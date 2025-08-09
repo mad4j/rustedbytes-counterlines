@@ -1,9 +1,23 @@
 [package]
 name = "rustedbytes-counterlines"
 version = "0.1.0"
-edition = "2024"
-authors = ["Your Name <your.email@example.com>"]
-description = "Source Lines of Code (SLOC) counter CLI tool"
+edition = "2021"
+authors = ["Daniele Olmisani <daniele.olmisani@gmail.com>"]
+description = "A high-performance, multi-language source code line counter CLI tool written in Rust"
+license = "MIT"
+readme = "README.md"
+homepage = "https://github.com/daniele-olmisani/rustedbytes-counterlines"
+repository = "https://github.com/daniele-olmisani/rustedbytes-counterlines"
+documentation = "https://docs.rs/rustedbytes-counterlines"
+keywords = ["sloc", "lines-of-code", "source-code", "metrics", "cli"]
+categories = ["command-line-utilities", "development-tools"]
+exclude = [
+    "tests/*",
+    "examples/*",
+    ".github/*",
+    "*.log",
+    "target/*"
+]
 
 [dependencies]
 # CLI argument parsing (REQ-8.1, REQ-8.2)
@@ -63,3 +77,7 @@ num_cpus = "1.16"
 tempfile = "3.12"
 assert_cmd = "2.0"
 predicates = "3.1"
+
+[[bin]]
+name = "sloc"
+path = "src/main.rs"
