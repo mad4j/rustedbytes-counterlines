@@ -1,5 +1,5 @@
 // cli.rs - Command-line interface definitions
-// Implements: REQ-8.1, REQ-8.2, REQ-8.3, REQ-8.4
+// Implements: REQ-8.1, REQ-8.2, REQ-8.3, REQ-8.4, REQ-9.7
 
 use clap::{Parser, Subcommand, ValueEnum};
 use std::path::PathBuf;
@@ -96,6 +96,19 @@ pub struct CountArgs {
     /// Ignore preprocessor directives
     #[arg(long)]
     pub ignore_preprocessor: bool,
+    
+    // REQ-9.7: Performance metrics logging
+    /// Enable performance metrics logging
+    #[arg(long)]
+    pub enable_metrics: bool,
+    
+    /// Custom metrics log file path
+    #[arg(long)]
+    pub metrics_file: Option<PathBuf>,
+    
+    /// Show performance summary for operations over this threshold (seconds)
+    #[arg(long, default_value = "5")]
+    pub perf_summary_threshold: u64,
 }
 
 #[derive(Parser)]
@@ -127,6 +140,14 @@ pub struct ReportArgs {
     /// Number of parallel threads
     #[arg(short = 'j', long, default_value = "0")]
     pub threads: usize,
+    
+    /// Enable performance metrics logging
+    #[arg(long)]
+    pub enable_metrics: bool,
+    
+    /// Custom metrics log file path
+    #[arg(long)]
+    pub metrics_file: Option<PathBuf>,
 }
 
 #[derive(Parser)]
@@ -147,6 +168,14 @@ pub struct ProcessArgs {
     /// Export format
     #[arg(short = 'f', long, value_enum)]
     pub format: Option<OutputFormat>,
+    
+    /// Enable performance metrics logging
+    #[arg(long)]
+    pub enable_metrics: bool,
+    
+    /// Custom metrics log file path
+    #[arg(long)]
+    pub metrics_file: Option<PathBuf>,
 }
 
 #[derive(Parser)]
@@ -168,9 +197,17 @@ pub struct CompareArgs {
     /// Export format
     #[arg(short = 'f', long, value_enum)]
     pub format: Option<OutputFormat>,
+    
+    /// Enable performance metrics logging
+    #[arg(long)]
+    pub enable_metrics: bool,
+    
+    /// Custom metrics log file path
+    #[arg(long)]
+    pub metrics_file: Option<PathBuf>,
 }
 
-#[derive(Clone, Copy, ValueEnum)]
+#[derive(Debug, Clone, Copy, ValueEnum)]
 pub enum OutputFormat {
     /// JSON format (REQ-6.1)
     Json,

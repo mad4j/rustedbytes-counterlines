@@ -1,0 +1,74 @@
+# config.toml - Example configuration file for SLOC counter
+# REQ-3.3: Custom language definitions and REQ-9.7: Performance metrics
+
+[performance]
+# REQ-9.7: Performance metrics configuration
+default_threads = 0  # 0 = auto-detect
+chunk_size = 1000    # Files per chunk for parallel processing
+enable_metrics = false  # Set to true to enable performance logging
+metrics_file = "sloc_metrics.log"  # Path to metrics log file
+
+[defaults]
+# Default values for common CLI options
+recursive = false
+no_progress = false
+output_format = "json"
+
+# Custom language definitions can be added here
+# This extends the built-in language support
+[languages]
+
+[languages.kotlin]
+name = "Kotlin"
+extensions = ["kt", "kts"]
+single_line_comment = ["//"]
+multi_line_comment = [
+    { start = "/*", end = "*/" }
+]
+nested_comments = true
+
+[languages.swift]
+name = "Swift"
+extensions = ["swift"]
+single_line_comment = ["//"]
+multi_line_comment = [
+    { start = "/*", end = "*/" }
+]
+nested_comments = true
+
+[languages.php]
+name = "PHP"
+extensions = ["php", "php3", "php4", "php5", "phtml"]
+single_line_comment = ["//", "#"]
+multi_line_comment = [
+    { start = "/*", end = "*/" }
+]
+nested_comments = false
+
+[languages.dart]
+name = "Dart"
+extensions = ["dart"]
+single_line_comment = ["//"]
+multi_line_comment = [
+    { start = "/*", end = "*/" }
+]
+nested_comments = false
+
+[languages.perl]
+name = "Perl"
+extensions = ["pl", "pm", "perl"]
+single_line_comment = ["#"]
+multi_line_comment = [
+    { start = "=begin", end = "=end" },
+    { start = "=pod", end = "=cut" }
+]
+nested_comments = false
+
+[languages.powershell]
+name = "PowerShell"
+extensions = ["ps1", "psm1", "psd1"]
+single_line_comment = ["#"]
+multi_line_comment = [
+    { start = "<#", end = "#>" }
+]
+nested_comments = true

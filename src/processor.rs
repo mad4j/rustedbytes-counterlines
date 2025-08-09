@@ -1,7 +1,8 @@
 // processor.rs - Report processing and comparison
-// Implements: REQ-7.1, REQ-7.2, REQ-7.3, REQ-7.4
+// Implements: REQ-7.1, REQ-7.2, REQ-7.3, REQ-7.4, REQ-9.7
 
 use crate::cli::{CompareArgs, ProcessArgs, OutputFormat};
+use crate::config::{AppConfig, MetricsLogger};
 use crate::error::{Result, SlocError};
 use crate::output::{ConsoleOutput, ReportExporter};
 use crate::report::Report;
@@ -10,9 +11,25 @@ use num_format::{Locale, ToFormattedString};
 use prettytable::{Cell, Row, Table};
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
+use std::sync::Arc;
+use std::time::Instant;
 
 /// REQ-7.1: Process existing report without rescanning
 pub fn execute_process(args: ProcessArgs) -> Result<()> {
+    let start_time = Instant::now();
+    
+    // REQ-9.7: Initialize metrics logger
+    let app_config = AppConfig::with_cli_overrides(
+        None,
+        args.enable_metrics,
+        args.metrics_file.as_ref(),
+    )?;
+    
+    let metrics_logger = Arc::new(MetricsLogger::new(&app_config.performance));
+    let args_summary = format!("report={}", args.report.display());
+    metrics_logger.init_session("process", &args_summary);
+    metrics_logger.log_system_info();
+    
     // Detect format from file extension
     let format = args.format.unwrap_or_else(|| {
         if args.report.extension().and_then(|e| e.to_str()) == Some("json") {
@@ -26,18 +43,34 @@ pub fn execute_process(args: ProcessArgs) -> Result<()> {
         }
     });
     
+    let load_start = Instant::now();
     let report = Report::from_file(&args.report, format)?;
+    metrics_logger.log_metric("report_load_time", load_start.elapsed().as_secs_f64());
+    metrics_logger.log_metric("report_files_count", report.files.len() as f64);
+    metrics_logger.log_metric("report_total_lines", report.summary.total_lines as f64);
     
     // Display summary (REQ-7.1: compute global statistics)
+    let console_start = Instant::now();
     let console = ConsoleOutput::new(args.sort);
     console.display_summary(&report)?;
+    metrics_logger.log_metric("console_display_time", console_start.elapsed().as_secs_f64());
     
     // Export if requested
     if let Some(export_path) = args.export {
+        let export_start = Instant::now();
         let export_format = args.format.unwrap_or(OutputFormat::Json);
         let exporter = ReportExporter::new();
         exporter.export(&report, &export_path, export_format)?;
+        metrics_logger.log_metric("export_time", export_start.elapsed().as_secs_f64());
         println!("\nProcessed report exported to: {}", export_path.display());
+    }
+    
+    let total_time = start_time.elapsed();
+    metrics_logger.log_completion(report.summary.total_files, report.summary.total_lines);
+    metrics_logger.log_metric("total_operation_time", total_time.as_secs_f64());
+    
+    if metrics_logger.is_enabled() {
+        println!("Metrics logged to: {}", metrics_logger.file_path());
     }
     
     Ok(())
@@ -45,23 +78,77 @@ pub fn execute_process(args: ProcessArgs) -> Result<()> {
 
 /// REQ-7.2, REQ-7.3, REQ-7.4: Compare two reports
 pub fn execute_compare(args: CompareArgs) -> Result<()> {
+    let start_time = Instant::now();
+    
+    // REQ-9.7: Initialize metrics logger
+    let app_config = AppConfig::with_cli_overrides(
+        None,
+        args.enable_metrics,
+        args.metrics_file.as_ref(),
+    )?;
+    
+    let metrics_logger = Arc::new(MetricsLogger::new(&app_config.performance));
+    let args_summary = format!(
+        "report1={}, report2={}",
+        args.report1.display(),
+        args.report2.display()
+    );
+    metrics_logger.init_session("compare", &args_summary);
+    metrics_logger.log_system_info();
+    
     // Detect formats
     let format1 = detect_format(&args.report1);
     let format2 = detect_format(&args.report2);
     
+    let load_start = Instant::now();
     let report1 = Report::from_file(&args.report1, format1)?;
-    let report2 = Report::from_file(&args.report2, format2)?;
+    metrics_logger.log_metric("report1_load_time", load_start.elapsed().as_secs_f64());
     
+    let load_start = Instant::now();
+    let report2 = Report::from_file(&args.report2, format2)?;
+    metrics_logger.log_metric("report2_load_time", load_start.elapsed().as_secs_f64());
+    
+    metrics_logger.log_metric("report1_files_count", report1.files.len() as f64);
+    metrics_logger.log_metric("report2_files_count", report2.files.len() as f64);
+    metrics_logger.log_metric("report1_total_lines", report1.summary.total_lines as f64);
+    metrics_logger.log_metric("report2_total_lines", report2.summary.total_lines as f64);
+    
+    let comparison_start = Instant::now();
     let comparison = ComparisonResult::compare(&report1, &report2);
+    metrics_logger.log_metric("comparison_time", comparison_start.elapsed().as_secs_f64());
+    
+    // Log comparison metrics
+    metrics_logger.log_metric("files_delta", comparison.global_delta.files_delta as f64);
+    metrics_logger.log_metric("total_lines_delta", comparison.global_delta.total_lines_delta as f64);
+    metrics_logger.log_metric("logical_lines_delta", comparison.global_delta.logical_lines_delta as f64);
+    metrics_logger.log_metric("new_files_count", comparison.new_files.len() as f64);
+    metrics_logger.log_metric("removed_files_count", comparison.removed_files.len() as f64);
+    metrics_logger.log_metric("modified_files_count", comparison.modified_files.len() as f64);
+    metrics_logger.log_metric("language_deltas_count", comparison.language_deltas.len() as f64);
     
     // REQ-7.3: Display comparison in console
+    let display_start = Instant::now();
     display_comparison(&comparison)?;
+    metrics_logger.log_metric("display_time", display_start.elapsed().as_secs_f64());
     
     // REQ-7.4: Export comparison if requested
     if let Some(export_path) = args.export {
+        let export_start = Instant::now();
         let format = args.format.unwrap_or(OutputFormat::Json);
         export_comparison(&comparison, &export_path, format)?;
+        metrics_logger.log_metric("export_time", export_start.elapsed().as_secs_f64());
         println!("\nComparison exported to: {}", export_path.display());
+    }
+    
+    let total_time = start_time.elapsed();
+    let total_files = std::cmp::max(report1.summary.total_files, report2.summary.total_files);
+    let total_lines = std::cmp::max(report1.summary.total_lines, report2.summary.total_lines);
+    
+    metrics_logger.log_completion(total_files, total_lines);
+    metrics_logger.log_metric("total_operation_time", total_time.as_secs_f64());
+    
+    if metrics_logger.is_enabled() {
+        println!("Metrics logged to: {}", metrics_logger.file_path());
     }
     
     Ok(())
@@ -271,6 +358,11 @@ fn display_comparison(comparison: &ComparisonResult) -> Result<()> {
             for file in &comparison.new_files {
                 println!("  + {}", file.green());
             }
+        } else {
+            for file in comparison.new_files.iter().take(10) {
+                println!("  + {}", file.green());
+            }
+            println!("  ... and {} more", comparison.new_files.len() - 10);
         }
     }
     
@@ -280,6 +372,11 @@ fn display_comparison(comparison: &ComparisonResult) -> Result<()> {
             for file in &comparison.removed_files {
                 println!("  - {}", file.red());
             }
+        } else {
+            for file in comparison.removed_files.iter().take(10) {
+                println!("  - {}", file.red());
+            }
+            println!("  ... and {} more", comparison.removed_files.len() - 10);
         }
     }
     
@@ -291,6 +388,13 @@ fn display_comparison(comparison: &ComparisonResult) -> Result<()> {
                     file.path.yellow(),
                     format_delta(file.total_lines_delta));
             }
+        } else {
+            for file in comparison.modified_files.iter().take(10) {
+                println!("  ~ {} ({})", 
+                    file.path.yellow(),
+                    format_delta(file.total_lines_delta));
+            }
+            println!("  ... and {} more", comparison.modified_files.len() - 10);
         }
     }
     

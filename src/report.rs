@@ -1,7 +1,8 @@
 // report.rs - Report structure and generation
-// Implements: REQ-6.1, REQ-6.2, REQ-6.3, REQ-6.4, REQ-6.5, REQ-6.6, REQ-6.7, REQ-6.9
+// Implements: REQ-6.1, REQ-6.2, REQ-6.3, REQ-6.4, REQ-6.5, REQ-6.6, REQ-6.7, REQ-6.9, REQ-9.7
 
 use crate::cli::ReportArgs;
+use crate::config::{AppConfig, MetricsLogger};
 use crate::counter;
 use crate::error::Result;
 use chrono::{DateTime, Utc};
@@ -9,6 +10,8 @@ use serde::{Deserialize, Serialize};
 use sha2::{Digest, Sha256};
 use std::collections::HashMap;
 use std::path::PathBuf;
+use std::sync::Arc;
+use std::time::Instant;
 
 /// REQ-6.6: Report format version
 const REPORT_FORMAT_VERSION: &str = "1.0";
@@ -140,6 +143,7 @@ impl Report {
     
     /// Load report from file
     pub fn from_file(path: &PathBuf, format: crate::cli::OutputFormat) -> Result<Self> {
+        let load_start = Instant::now();
         let content = std::fs::read_to_string(path)?;
         
         let report = match format {
@@ -156,6 +160,14 @@ impl Report {
                 Self::from_csv(&content)?
             }
         };
+        
+        // Log load performance if this takes a significant time
+        let load_time = load_start.elapsed();
+        if load_time.as_millis() > 100 {
+            println!("Report loaded in {:.2}s ({} files)", 
+                load_time.as_secs_f64(), 
+                report.files.len());
+        }
         
         Ok(report)
     }
@@ -177,6 +189,28 @@ impl Report {
 
 /// Execute report generation command
 pub fn execute_report(args: ReportArgs) -> Result<()> {
+    let start_time = Instant::now();
+    
+    // REQ-9.7: Initialize metrics logger
+    let app_config = AppConfig::with_cli_overrides(
+        args.config.as_deref(),
+        args.enable_metrics,
+        args.metrics_file.as_ref(),
+    )?;
+    
+    let metrics_logger = Arc::new(MetricsLogger::new(&app_config.performance));
+    
+    let args_summary = format!(
+        "paths={}, format={:?}, output={}, recursive={}, checksum={}",
+        args.paths.len(),
+        args.format,
+        args.output.display(),
+        args.recursive,
+        args.checksum
+    );
+    metrics_logger.init_session("report", &args_summary);
+    metrics_logger.log_system_info();
+    
     // Convert ReportArgs to CountArgs for reuse
     let count_args = crate::cli::CountArgs {
         paths: args.paths,
@@ -191,11 +225,24 @@ pub fn execute_report(args: ReportArgs) -> Result<()> {
         threads: args.threads,
         checksum: args.checksum,
         ignore_preprocessor: false,
+        enable_metrics: args.enable_metrics,
+        metrics_file: args.metrics_file,
+        perf_summary_threshold: 5,
     };
     
     // Reuse count logic
+    let count_start = Instant::now();
     counter::execute_count(count_args)?;
+    metrics_logger.log_metric("count_execution_time", count_start.elapsed().as_secs_f64());
+    
+    let total_time = start_time.elapsed();
+    metrics_logger.log_metric("total_report_generation_time", total_time.as_secs_f64());
     
     println!("Report generated successfully: {}", args.output.display());
+    
+    if metrics_logger.is_enabled() {
+        println!("Metrics logged to: {}", metrics_logger.file_path());
+    }
+    
     Ok(())
 }
