@@ -7,20 +7,11 @@ use std::path::PathBuf;
 #[derive(Error, Debug)]
 pub enum SlocError {
     /// REQ-2.5: Error messages for invalid/inaccessible paths
-    #[error("Invalid path: {path}")]
-    InvalidPath { path: PathBuf },
-    
     #[error("File not found: {path}")]
     FileNotFound { path: PathBuf },
     
-    #[error("Permission denied: {path}")]
-    PermissionDenied { path: PathBuf },
-    
     #[error("IO error: {0}")]
     Io(#[from] std::io::Error),
-    
-    #[error("Language not supported: {0}")]
-    UnsupportedLanguage(String),
     
     #[error("Invalid configuration: {0}")]
     InvalidConfig(String),
@@ -31,14 +22,30 @@ pub enum SlocError {
     #[error("Deserialization error: {0}")]
     Deserialization(String),
     
+    #[error("Parse error: {0}")]
+    Parse(String),
+    
+    // Varianti che potrebbero essere usate in futuro
+    // Usa l'attributo allow per silenziare i warning
+    #[allow(dead_code)]
+    #[error("Invalid path: {path}")]
+    InvalidPath { path: PathBuf },
+    
+    #[allow(dead_code)]
+    #[error("Permission denied: {path}")]
+    PermissionDenied { path: PathBuf },
+    
+    #[allow(dead_code)]
+    #[error("Language not supported: {0}")]
+    UnsupportedLanguage(String),
+    
+    #[allow(dead_code)]
     #[error("Invalid report format: {0}")]
     InvalidReportFormat(String),
     
+    #[allow(dead_code)]
     #[error("Encoding error: {0}")]
     Encoding(String),
-    
-    #[error("Parse error: {0}")]
-    Parse(String),
 }
 
 pub type Result<T> = std::result::Result<T, SlocError>;

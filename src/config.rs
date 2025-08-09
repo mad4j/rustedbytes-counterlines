@@ -149,7 +149,7 @@ impl MetricsLogger {
     }
     
     /// Create MetricsLogger from CLI arguments
-    pub fn from_cli(enable_metrics: bool, metrics_file: Option<&PathBuf>) -> Self {
+    pub fn _from_cli(enable_metrics: bool, metrics_file: Option<&PathBuf>) -> Self {
         let file_path = metrics_file
             .map(|p| p.to_string_lossy().to_string())
             .unwrap_or_else(|| "sloc_metrics.log".to_string());
@@ -214,7 +214,7 @@ impl MetricsLogger {
     }
     
     /// Log a metric with additional context
-    pub fn log_metric_with_context(&self, metric_name: &str, value: f64, context: &str) {
+    pub fn _log_metric_with_context(&self, metric_name: &str, value: f64, context: &str) {
         if !self.enabled {
             return;
         }
