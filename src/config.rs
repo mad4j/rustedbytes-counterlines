@@ -1,0 +1,161 @@
+// config.rs - Configuration management
+// Implements: REQ-3.3, REQ-9.7
+
+use serde::{Deserialize, Serialize};
+use std::collections::HashMap;
+use std::path::Path;
+
+/// Language configuration that can be loaded from TOML
+/// REQ-3.3: Language definitions via configuration files
+#[derive(Debug, Serialize, Deserialize)]
+pub struct LanguageConfig {
+    pub languages: HashMap<String, LanguageDefinition>,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct LanguageDefinition {
+    pub name: String,
+    pub extensions: Vec<String>,
+    pub single_line_comment: Vec<String>,
+    pub multi_line_comment: Vec<MultiLineComment>,
+    #[serde(default)]
+    pub nested_comments: bool,
+    pub preprocessor_prefix: Option<String>,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct MultiLineComment {
+    pub start: String,
+    pub end: String,
+}
+
+/// Application configuration
+#[derive(Debug, Serialize, Deserialize)]
+pub struct AppConfig {
+    #[serde(default)]
+    pub performance: PerformanceConfig,
+    #[serde(default)]
+    pub defaults: DefaultsConfig,
+}
+
+/// REQ-9.7: Performance metrics configuration
+#[derive(Debug, Serialize, Deserialize)]
+pub struct PerformanceConfig {
+    #[serde(default = "default_threads")]
+    pub default_threads: usize,
+    #[serde(default = "default_chunk_size")]
+    pub chunk_size: usize,
+    #[serde(default = "default_enable_metrics")]
+    pub enable_metrics: bool,
+    #[serde(default = "default_metrics_file")]
+    pub metrics_file: String,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct DefaultsConfig {
+    #[serde(default = "default_recursive")]
+    pub recursive: bool,
+    #[serde(default = "default_progress")]
+    pub show_progress: bool,
+    #[serde(default = "default_format")]
+    pub output_format: String,
+}
+
+impl Default for PerformanceConfig {
+    fn default() -> Self {
+        Self {
+            default_threads: default_threads(),
+            chunk_size: default_chunk_size(),
+            enable_metrics: default_enable_metrics(),
+            metrics_file: default_metrics_file(),
+        }
+    }
+}
+
+impl Default for DefaultsConfig {
+    fn default() -> Self {
+        Self {
+            recursive: default_recursive(),
+            show_progress: default_progress(),
+            output_format: default_format(),
+        }
+    }
+}
+
+fn default_threads() -> usize { 0 }
+fn default_chunk_size() -> usize { 1000 }
+fn default_enable_metrics() -> bool { false }
+fn default_metrics_file() -> String { "sloc_metrics.log".to_string() }
+fn default_recursive() -> bool { false }
+fn default_progress() -> bool { true }
+fn default_format() -> String { "json".to_string() }
+
+impl AppConfig {
+    pub fn _from_file(path: &Path) -> crate::error::Result<Self> {
+        let content = std::fs::read_to_string(path)?;
+        toml::from_str(&content)
+            .map_err(|e| crate::error::SlocError::InvalidConfig(e.to_string()))
+    }
+    
+    pub fn _default() -> Self {
+        Self {
+            performance: PerformanceConfig::default(),
+            defaults: DefaultsConfig::default(),
+        }
+    }
+}
+
+/// REQ-9.7: Performance metrics logger
+pub struct MetricsLogger {
+    enabled: bool,
+    start_time: std::time::Instant,
+    file_path: String,
+}
+
+impl MetricsLogger {
+    pub fn new(config: &PerformanceConfig) -> Self {
+        Self {
+            enabled: config.enable_metrics,
+            start_time: std::time::Instant::now(),
+            file_path: config.metrics_file.clone(),
+        }
+    }
+    
+    pub fn log_metric(&self, metric_name: &str, value: f64) {
+        if !self.enabled {
+            return;
+        }
+        
+        let elapsed = self.start_time.elapsed().as_secs_f64();
+        let log_entry = format!("[{:.3}s] {}: {:.3}\n", elapsed, metric_name, value);
+        
+        if let Err(e) = std::fs::OpenOptions::new()
+            .create(true)
+            .append(true)
+            .open(&self.file_path)
+            .and_then(|mut file| {
+                use std::io::Write;
+                file.write_all(log_entry.as_bytes())
+            }) {
+            eprintln!("Failed to log metric: {}", e);
+        }
+    }
+    
+    pub fn log_completion(&self, files_processed: usize, total_lines: usize) {
+        if !self.enabled {
+            return;
+        }
+        
+        let elapsed = self.start_time.elapsed();
+        let throughput = if elapsed.as_secs() > 0 {
+            total_lines as f64 / elapsed.as_secs_f64()
+        } else {
+            0.0
+        };
+        
+        self.log_metric("total_files", files_processed as f64);
+        self.log_metric("total_lines", total_lines as f64);
+        self.log_metric("elapsed_seconds", elapsed.as_secs_f64());
+        self.log_metric("lines_per_second", throughput);
+    }
+}

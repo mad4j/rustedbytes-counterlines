@@ -1,0 +1,66 @@
+[package]
+name = "rustedbytes-counterlines"
+version = "0.1.0"
+edition = "2024"
+authors = ["Your Name <your.email@example.com>"]
+description = "Source Lines of Code (SLOC) counter CLI tool"
+
+[[bin]]
+name = "sloc"
+path = "src/main.rs"
+
+[dependencies]
+# CLI argument parsing (REQ-8.1, REQ-8.2)
+clap = { version = "4.5", features = ["derive", "cargo"] }
+
+# File traversal and glob patterns (REQ-2.1, REQ-2.2, REQ-2.3)
+walkdir = "2.5"
+glob = "0.3"
+
+# Serialization/Deserialization (REQ-6.1, REQ-6.2, REQ-6.3)
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+serde-xml-rs = "0.6"
+csv = "1.3"
+
+# Date/Time handling (REQ-6.5)
+chrono = { version = "0.4", features = ["serde"] }
+
+# Progress indicators (REQ-9.5)
+indicatif = "0.17"
+
+# Parallel processing (REQ-9.4)
+rayon = "1.10"
+
+# Table formatting for console output (REQ-5.1, REQ-5.2, REQ-5.3)
+prettytable-rs = "0.10"
+
+# Number formatting (REQ-5.3)
+num-format = "0.4"
+
+# Colored output
+colored = "2.1"
+
+# Error handling
+anyhow = "1.0"
+thiserror = "1.0"
+
+# Encoding detection (REQ-9.2)
+encoding_rs = "0.8"
+encoding_rs_io = "0.1"
+
+# SHA256 for checksums (REQ-6.9)
+sha2 = "0.10"
+hex = "0.4"
+
+# TOML for configuration files (REQ-3.3)
+toml = "0.8"
+
+# Regex for comment parsing
+regex = "1.10"
+once_cell = "1.20"
+
+[dev-dependencies]
+tempfile = "3.12"
+assert_cmd = "2.0"
+predicates = "3.1"

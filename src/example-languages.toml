@@ -1,0 +1,138 @@
+# example-languages.toml - Example language configuration file
+# REQ-3.3: Custom language definitions
+
+[languages.kotlin]
+name = "Kotlin"
+extensions = ["kt", "kts"]
+single_line_comment = ["//"]
+multi_line_comment = [
+    { start = "/*", end = "*/" }
+]
+nested_comments = true
+# preprocessor_prefix not defined (None)
+
+[languages.swift]
+name = "Swift"
+extensions = ["swift"]
+single_line_comment = ["//"]
+multi_line_comment = [
+    { start = "/*", end = "*/" }
+]
+nested_comments = true
+# preprocessor_prefix not defined (None)
+
+[languages.php]
+name = "PHP"
+extensions = ["php", "php3", "php4", "php5", "phtml"]
+single_line_comment = ["//", "#"]
+multi_line_comment = [
+    { start = "/*", end = "*/" }
+]
+nested_comments = false
+# preprocessor_prefix not defined (None)
+
+[languages.lua]
+name = "Lua"
+extensions = ["lua"]
+single_line_comment = ["--"]
+multi_line_comment = [
+    { start = "--[[", end = "]]" }
+]
+nested_comments = true
+# preprocessor_prefix not defined (None)
+
+[languages.matlab]
+name = "MATLAB"
+extensions = ["m", "mat"]
+single_line_comment = ["%"]
+multi_line_comment = [
+    { start = "%{", end = "%}" }
+]
+nested_comments = false
+# preprocessor_prefix not defined (None)
+
+[languages.r]
+name = "R"
+extensions = ["r", "R"]
+single_line_comment = ["#"]
+multi_line_comment = []
+nested_comments = false
+# preprocessor_prefix not defined (None)
+
+[languages.dockerfile]
+name = "Dockerfile"
+extensions = ["dockerfile", "Dockerfile"]
+single_line_comment = ["#"]
+multi_line_comment = []
+nested_comments = false
+# preprocessor_prefix not defined (None)
+
+[languages.makefile]
+name = "Makefile"
+extensions = ["mk", "makefile", "Makefile", "GNUmakefile"]
+single_line_comment = ["#"]
+multi_line_comment = []
+nested_comments = false
+# preprocessor_prefix not defined (None)
+
+[languages.vim]
+name = "Vim Script"
+extensions = ["vim", "vimrc"]
+single_line_comment = ["\""]
+multi_line_comment = []
+nested_comments = false
+# preprocessor_prefix not defined (None)
+
+[languages.elixir]
+name = "Elixir"
+extensions = ["ex", "exs"]
+single_line_comment = ["#"]
+multi_line_comment = []
+nested_comments = false
+# preprocessor_prefix not defined (None)
+
+[languages.erlang]
+name = "Erlang"
+extensions = ["erl", "hrl"]
+single_line_comment = ["%"]
+multi_line_comment = []
+nested_comments = false
+# preprocessor_prefix not defined (None)
+
+[languages.scala]
+name = "Scala"
+extensions = ["scala", "sc"]
+single_line_comment = ["//"]
+multi_line_comment = [
+    { start = "/*", end = "*/" }
+]
+nested_comments = true
+# preprocessor_prefix not defined (None)
+
+[languages.haskell]
+name = "Haskell"
+extensions = ["hs", "lhs"]
+single_line_comment = ["--"]
+multi_line_comment = [
+    { start = "{-", end = "-}" }
+]
+nested_comments = true
+# preprocessor_prefix not defined (None)
+
+[languages.clojure]
+name = "Clojure"
+extensions = ["clj", "cljs", "cljc", "edn"]
+single_line_comment = [";"]
+multi_line_comment = []
+nested_comments = false
+# preprocessor_prefix not defined (None)
+
+[languages.fsharp]
+name = "F#"
+extensions = ["fs", "fsi", "fsx"]
+single_line_comment = ["//"]
+multi_line_comment = [
+    { start = "(*", end = "*)" }
+]
+nested_comments = true
+# preprocessor_prefix not defined (None)
