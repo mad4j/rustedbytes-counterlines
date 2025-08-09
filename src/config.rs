@@ -55,8 +55,8 @@ pub struct PerformanceConfig {
 pub struct DefaultsConfig {
     #[serde(default = "default_recursive")]
     pub recursive: bool,
-    #[serde(default = "default_progress")]
-    pub show_progress: bool,
+    #[serde(default = "default_no_progress")]
+    pub no_progress: bool,
     #[serde(default = "default_format")]
     pub output_format: String,
 }
@@ -76,7 +76,7 @@ impl Default for DefaultsConfig {
     fn default() -> Self {
         Self {
             recursive: default_recursive(),
-            show_progress: default_progress(),
+            no_progress: default_no_progress(),
             output_format: default_format(),
         }
     }
@@ -87,7 +87,7 @@ fn default_chunk_size() -> usize { 1000 }
 fn default_enable_metrics() -> bool { false }
 fn default_metrics_file() -> String { "sloc_metrics.log".to_string() }
 fn default_recursive() -> bool { false }
-fn default_progress() -> bool { true }
+fn default_no_progress() -> bool { false } // progress enabled by default
 fn default_format() -> String { "json".to_string() }
 
 impl AppConfig {

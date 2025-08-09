@@ -4,8 +4,6 @@
 use crate::cli::ReportArgs;
 use crate::counter;
 use crate::error::Result;
-use crate::language::LanguageDetector;
-use crate::output::ReportExporter;
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 use sha2::{Digest, Sha256};
@@ -189,7 +187,7 @@ pub fn execute_report(args: ReportArgs) -> Result<()> {
         sort: None,
         language_override: vec![],
         config: args.config,
-        progress: true,
+        no_progress: false,
         threads: args.threads,
         checksum: args.checksum,
         ignore_preprocessor: false,

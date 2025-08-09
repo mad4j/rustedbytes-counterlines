@@ -41,7 +41,8 @@ pub fn execute_count(args: CountArgs) -> Result<()> {
     }
     
     // REQ-9.5: Progress indicator
-    let progress = if args.progress {
+    // Progress bar is enabled by default, disabled with --no-progress
+    let progress = if !args.no_progress {
         let pb = ProgressBar::new(paths.len() as u64);
         pb.set_style(
             ProgressStyle::default_bar()

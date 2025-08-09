@@ -7,6 +7,7 @@ use std::path::PathBuf;
 #[derive(Parser)]
 #[command(author, version, about, long_about = None)]
 #[command(propagate_version = true)]
+
 pub struct Cli {
     /// REQ-8.2: Display help via --help or -h
     #[command(subcommand)]
@@ -75,10 +76,10 @@ pub struct CountArgs {
     #[arg(long)]
     pub config: Option<PathBuf>,
     
-    /// Show progress bar
-    /// REQ-9.5: Progress indicators
+    /// Disable progress bar
+    /// REQ-9.5: Progress indicators (inverted logic - enabled by default)
     #[arg(long)]
-    pub progress: bool,
+    pub no_progress: bool,
     
     /// Number of parallel threads (0 = auto)
     /// REQ-9.4: Parallel processing
