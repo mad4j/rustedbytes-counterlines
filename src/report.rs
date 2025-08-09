@@ -42,19 +42,19 @@ pub struct LanguageStats {
 pub struct Report {
     /// REQ-6.6: Report format version
     pub report_format_version: String,
-    
+
     /// REQ-6.5: Generation timestamp (RFC 3339 / ISO 8601)
     pub generated_at: DateTime<Utc>,
-    
+
     /// REQ-6.4: Per-file statistics
     pub files: Vec<FileStats>,
-    
+
     /// Language summaries
     pub languages: Vec<LanguageStats>,
-    
+
     /// Global summary
     pub summary: GlobalSummary,
-    
+
     /// REQ-6.9: Optional checksum
     #[serde(skip_serializing_if = "Option::is_none")]
     pub checksum: Option<String>,
@@ -74,7 +74,7 @@ impl Report {
     pub fn new(files: Vec<FileStats>) -> Self {
         let languages = Self::calculate_language_stats(&files);
         let summary = Self::calculate_summary(&files, &languages);
-        
+
         Report {
             report_format_version: REPORT_FORMAT_VERSION.to_string(),
             generated_at: Utc::now(),
@@ -84,32 +84,34 @@ impl Report {
             checksum: None,
         }
     }
-    
+
     /// Calculate language statistics
     fn calculate_language_stats(files: &[FileStats]) -> Vec<LanguageStats> {
         let mut lang_map: HashMap<String, LanguageStats> = HashMap::new();
-        
+
         for file in files {
-            let entry = lang_map.entry(file.language.clone()).or_insert(LanguageStats {
-                language: file.language.clone(),
-                file_count: 0,
-                total_lines: 0,
-                logical_lines: 0,
-                empty_lines: 0,
-            });
-            
+            let entry = lang_map
+                .entry(file.language.clone())
+                .or_insert(LanguageStats {
+                    language: file.language.clone(),
+                    file_count: 0,
+                    total_lines: 0,
+                    logical_lines: 0,
+                    empty_lines: 0,
+                });
+
             entry.file_count += 1;
             entry.total_lines += file.total_lines;
             entry.logical_lines += file.logical_lines;
             entry.empty_lines += file.empty_lines;
         }
-        
+
         let mut languages: Vec<LanguageStats> = lang_map.into_values().collect();
         // REQ-9.3: Deterministic output
         languages.sort_by(|a, b| a.language.cmp(&b.language));
         languages
     }
-    
+
     /// Calculate global summary
     fn calculate_summary(files: &[FileStats], languages: &[LanguageStats]) -> GlobalSummary {
         GlobalSummary {
@@ -120,15 +122,15 @@ impl Report {
             languages_count: languages.len(),
         }
     }
-    
+
     /// REQ-6.9: Calculate SHA256 checksum
     pub fn calculate_checksum(&mut self) {
         let mut hasher = Sha256::new();
-        
+
         // Hash all file stats in deterministic order
         let mut sorted_files = self.files.clone();
         sorted_files.sort_by(|a, b| a.path.cmp(&b.path));
-        
+
         for file in &sorted_files {
             hasher.update(file.path.to_string_lossy().as_bytes());
             hasher.update(file.language.as_bytes());
@@ -136,53 +138,51 @@ impl Report {
             hasher.update(file.logical_lines.to_string().as_bytes());
             hasher.update(file.empty_lines.to_string().as_bytes());
         }
-        
+
         let result = hasher.finalize();
         self.checksum = Some(hex::encode(result));
     }
-    
+
     /// Load report from file
     pub fn from_file(path: &PathBuf, format: crate::cli::OutputFormat) -> Result<Self> {
         let load_start = Instant::now();
         let content = std::fs::read_to_string(path)?;
-        
+
         let report = match format {
-            crate::cli::OutputFormat::Json => {
-                serde_json::from_str(&content)
-                    .map_err(|e| crate::error::SlocError::Deserialization(e.to_string()))?
-            }
-            crate::cli::OutputFormat::Xml => {
-                serde_xml_rs::from_str(&content)
-                    .map_err(|e| crate::error::SlocError::Deserialization(e.to_string()))?
-            }
+            crate::cli::OutputFormat::Json => serde_json::from_str(&content)
+                .map_err(|e| crate::error::SlocError::Deserialization(e.to_string()))?,
+            crate::cli::OutputFormat::Xml => serde_xml_rs::from_str(&content)
+                .map_err(|e| crate::error::SlocError::Deserialization(e.to_string()))?,
             crate::cli::OutputFormat::Csv => {
                 // CSV requires special handling
                 Self::from_csv(&content)?
             }
         };
-        
+
         // Log load performance if this takes a significant time
         let load_time = load_start.elapsed();
         if load_time.as_millis() > 100 {
-            println!("Report loaded in {:.2}s ({} files)", 
-                load_time.as_secs_f64(), 
-                report.files.len());
+            println!(
+                "Report loaded in {:.2}s ({} files)",
+                load_time.as_secs_f64(),
+                report.files.len()
+            );
         }
-        
+
         Ok(report)
     }
-    
+
     /// Load report from CSV
     fn from_csv(content: &str) -> Result<Self> {
         let mut reader = csv::Reader::from_reader(content.as_bytes());
         let mut files = Vec::new();
-        
+
         for result in reader.deserialize() {
-            let file: FileStats = result
-                .map_err(|e| crate::error::SlocError::Deserialization(e.to_string()))?;
+            let file: FileStats =
+                result.map_err(|e| crate::error::SlocError::Deserialization(e.to_string()))?;
             files.push(file);
         }
-        
+
         Ok(Self::new(files))
     }
 }
@@ -190,16 +190,16 @@ impl Report {
 /// Execute report generation command
 pub fn execute_report(args: ReportArgs) -> Result<()> {
     let start_time = Instant::now();
-    
+
     // REQ-9.7: Initialize metrics logger
     let app_config = AppConfig::with_cli_overrides(
         args.config.as_deref(),
         args.enable_metrics,
         args.metrics_file.as_ref(),
     )?;
-    
+
     let metrics_logger = Arc::new(MetricsLogger::new(&app_config.performance));
-    
+
     let args_summary = format!(
         "paths={}, format={:?}, output={}, recursive={}, checksum={}",
         args.paths.len(),
@@ -210,7 +210,7 @@ pub fn execute_report(args: ReportArgs) -> Result<()> {
     );
     metrics_logger.init_session("report", &args_summary);
     metrics_logger.log_system_info();
-    
+
     // Convert ReportArgs to CountArgs for reuse
     let count_args = crate::cli::CountArgs {
         paths: args.paths,
@@ -229,20 +229,20 @@ pub fn execute_report(args: ReportArgs) -> Result<()> {
         metrics_file: args.metrics_file,
         perf_summary_threshold: 5,
     };
-    
+
     // Reuse count logic
     let count_start = Instant::now();
     counter::execute_count(count_args)?;
     metrics_logger.log_metric("count_execution_time", count_start.elapsed().as_secs_f64());
-    
+
     let total_time = start_time.elapsed();
     metrics_logger.log_metric("total_report_generation_time", total_time.as_secs_f64());
-    
+
     println!("Report generated successfully: {}", args.output.display());
-    
+
     if metrics_logger.is_enabled() {
         println!("Metrics logged to: {}", metrics_logger.file_path());
     }
-    
+
     Ok(())
 }

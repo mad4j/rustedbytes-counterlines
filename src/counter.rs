@@ -4,10 +4,10 @@
 use crate::cli::CountArgs;
 use crate::config::{AppConfig, MetricsLogger};
 use crate::error::{Result, SlocError};
+use crate::language::{CommentParser, LanguageDetector, LineType};
+use crate::output::{ConsoleOutput, ReportExporter};
 use crate::report::{FileStats, Report};
 use colored::Colorize;
-use crate::language::{CommentParser,LanguageDetector, LineType};
-use crate::output::{ConsoleOutput, ReportExporter};
 use encoding_rs_io::DecodeReaderBytesBuilder;
 use glob::glob;
 use indicatif::{ProgressBar, ProgressStyle};
@@ -21,16 +21,16 @@ use walkdir::WalkDir;
 
 pub fn execute_count(args: CountArgs) -> Result<()> {
     let start_time = Instant::now();
-    
+
     // REQ-9.7: Initialize metrics logger with CLI overrides
     let app_config = AppConfig::with_cli_overrides(
         args.config.as_deref(),
         args.enable_metrics,
         args.metrics_file.as_ref(),
     )?;
-    
+
     let metrics_logger = Arc::new(MetricsLogger::new(&app_config.performance));
-    
+
     // Initialize metrics session
     let args_summary = format!(
         "paths={}, recursive={}, threads={}, format={:?}",
@@ -42,28 +42,34 @@ pub fn execute_count(args: CountArgs) -> Result<()> {
     metrics_logger.init_session("count", &args_summary);
     metrics_logger.log_system_info();
     metrics_logger.log_metric("operation_start", start_time.elapsed().as_secs_f64());
-    
+
     let mut detector = LanguageDetector::new();
-    
+
     // REQ-3.3: Load custom language config
     if let Some(config_path) = &args.config {
         let load_start = Instant::now();
         detector.load_from_config(config_path)?;
         metrics_logger.log_metric("config_load_time", load_start.elapsed().as_secs_f64());
     }
-    
+
     // REQ-3.4: Apply language overrides
     for (ext, lang) in &args.language_override {
         detector.add_override(ext.clone(), lang.clone());
     }
-    metrics_logger.log_metric("language_overrides_count", args.language_override.len() as f64);
-    
+    metrics_logger.log_metric(
+        "language_overrides_count",
+        args.language_override.len() as f64,
+    );
+
     // Collect all file paths
     let path_collection_start = Instant::now();
     let paths = collect_paths(&args)?;
-    metrics_logger.log_metric("path_collection_time", path_collection_start.elapsed().as_secs_f64());
+    metrics_logger.log_metric(
+        "path_collection_time",
+        path_collection_start.elapsed().as_secs_f64(),
+    );
     metrics_logger.log_metric("total_files_to_process", paths.len() as f64);
-    
+
     // REQ-9.4: Set up parallel processing
     let thread_count = if args.threads > 0 {
         rayon::ThreadPoolBuilder::new()
@@ -75,7 +81,7 @@ pub fn execute_count(args: CountArgs) -> Result<()> {
         rayon::current_num_threads()
     };
     metrics_logger.log_metric("thread_count", thread_count as f64);
-    
+
     // REQ-9.5: Progress indicator
     let progress = if !args.no_progress {
         let pb = ProgressBar::new(paths.len() as u64);
@@ -89,44 +95,48 @@ pub fn execute_count(args: CountArgs) -> Result<()> {
     } else {
         None
     };
-    
+
     // Count lines in parallel (REQ-9.4)
     let detector = Arc::new(detector);
     let ignore_preprocessor = args.ignore_preprocessor;
     let metrics_clone = Arc::clone(&metrics_logger);
-    
+
     let processing_start = Instant::now();
     let results: Vec<FileStats> = paths
         .par_iter()
         .filter_map(|path| {
             let file_start = Instant::now();
             let result = count_file(path, &detector, ignore_preprocessor);
-            
+
             // Log per-file metrics
             if let Ok(ref stats) = result {
                 let file_time = file_start.elapsed().as_secs_f64();
-                if file_time > 0.001 { // Only log if processing took more than 1ms
+                if file_time > 0.001 {
+                    // Only log if processing took more than 1ms
                     metrics_clone.log_metric(
-                        &format!("file_process_time_{}", path.file_name()
-                            .and_then(|n| n.to_str())
-                            .unwrap_or("unknown")), 
-                        file_time
+                        &format!(
+                            "file_process_time_{}",
+                            path.file_name()
+                                .and_then(|n| n.to_str())
+                                .unwrap_or("unknown")
+                        ),
+                        file_time,
                     );
                 }
-                
+
                 // Log throughput for large files
                 if stats.total_lines > 1000 {
                     let throughput = stats.total_lines as f64 / file_time;
                     metrics_clone.log_metric("large_file_throughput", throughput);
                 }
             }
-            
+
             if let Some(ref pb) = progress {
                 let pb = pb.lock().unwrap();
                 pb.inc(1);
                 pb.set_message(format!("Processing: {}", path.display()));
             }
-            
+
             match result {
                 Ok(stats) => Some(stats),
                 Err(e) => {
@@ -137,50 +147,56 @@ pub fn execute_count(args: CountArgs) -> Result<()> {
             }
         })
         .collect();
-    
+
     let processing_time = processing_start.elapsed();
     metrics_logger.log_metric("total_processing_time", processing_time.as_secs_f64());
-    
+
     if let Some(ref pb) = progress {
         pb.lock().unwrap().finish_with_message("Complete!");
     }
-    
+
     // Log processing statistics
     let total_lines: usize = results.iter().map(|r| r.total_lines).sum();
     let logical_lines: usize = results.iter().map(|r| r.logical_lines).sum();
     let empty_lines: usize = results.iter().map(|r| r.empty_lines).sum();
-    
+
     metrics_logger.log_metric("files_processed_successfully", results.len() as f64);
     metrics_logger.log_metric("total_lines_processed", total_lines as f64);
     metrics_logger.log_metric("logical_lines_processed", logical_lines as f64);
     metrics_logger.log_metric("empty_lines_processed", empty_lines as f64);
-    
+
     if processing_time.as_secs_f64() > 0.0 {
         let throughput = total_lines as f64 / processing_time.as_secs_f64();
         metrics_logger.log_metric("overall_throughput_lines_per_sec", throughput);
-        
+
         let files_per_sec = results.len() as f64 / processing_time.as_secs_f64();
         metrics_logger.log_metric("files_per_second", files_per_sec);
     }
-    
+
     // Create report (REQ-6.4, REQ-6.5, REQ-6.6)
     let report_creation_start = Instant::now();
     let mut report = Report::new(results);
-    metrics_logger.log_metric("report_creation_time", report_creation_start.elapsed().as_secs_f64());
-    
+    metrics_logger.log_metric(
+        "report_creation_time",
+        report_creation_start.elapsed().as_secs_f64(),
+    );
+
     // REQ-6.9: Add checksum if requested
     if args.checksum {
         let checksum_start = Instant::now();
         report.calculate_checksum();
-        metrics_logger.log_metric("checksum_calculation_time", checksum_start.elapsed().as_secs_f64());
+        metrics_logger.log_metric(
+            "checksum_calculation_time",
+            checksum_start.elapsed().as_secs_f64(),
+        );
     }
-    
+
     // REQ-5.1, REQ-5.2, REQ-5.3: Console output
     let console_start = Instant::now();
     let console = ConsoleOutput::new(args.sort);
     console.display_summary(&report)?;
     metrics_logger.log_metric("console_output_time", console_start.elapsed().as_secs_f64());
-    
+
     // REQ-6.8: Export report if requested
     if let Some(output_path) = args.output {
         if let Some(format) = args.format {
@@ -191,17 +207,17 @@ pub fn execute_count(args: CountArgs) -> Result<()> {
             println!("Report saved to: {}", output_path.display());
         }
     }
-    
+
     // REQ-9.7: Log final completion metrics
     let total_time = start_time.elapsed();
     metrics_logger.log_completion(report.summary.total_files, report.summary.total_lines);
     metrics_logger.log_metric("total_operation_time", total_time.as_secs_f64());
-    
+
     // Log memory usage if possible (approximate)
-    let memory_estimate = report.files.len() * std::mem::size_of::<FileStats>() +
-                         report.languages.len() * std::mem::size_of::<crate::report::LanguageStats>();
+    let memory_estimate = report.files.len() * std::mem::size_of::<FileStats>()
+        + report.languages.len() * std::mem::size_of::<crate::report::LanguageStats>();
     metrics_logger.log_metric("memory_usage_estimate_bytes", memory_estimate as f64);
-    
+
     // Performance summary for large operations
     if total_time.as_secs() >= args.perf_summary_threshold || report.summary.total_files > 1000 {
         println!("\n{}", "Performance Summary:".bright_cyan());
@@ -209,21 +225,23 @@ pub fn execute_count(args: CountArgs) -> Result<()> {
         println!("  Files processed: {}", report.summary.total_files);
         println!("  Lines processed: {}", report.summary.total_lines);
         if total_time.as_secs_f64() > 0.0 {
-            println!("  Throughput: {:.0} lines/sec", 
-                report.summary.total_lines as f64 / total_time.as_secs_f64());
+            println!(
+                "  Throughput: {:.0} lines/sec",
+                report.summary.total_lines as f64 / total_time.as_secs_f64()
+            );
         }
         if metrics_logger.is_enabled() {
             println!("  Metrics logged to: {}", metrics_logger.file_path());
         }
     }
-    
+
     Ok(())
 }
 
 /// REQ-2.1, REQ-2.2, REQ-2.3, REQ-2.4: Collect file paths from various sources
 fn collect_paths(args: &CountArgs) -> Result<Vec<PathBuf>> {
     let mut paths = Vec::new();
-    
+
     // REQ-2.4: Read from stdin if requested
     if args.stdin {
         use std::io::{self, BufRead};
@@ -238,7 +256,7 @@ fn collect_paths(args: &CountArgs) -> Result<Vec<PathBuf>> {
             }
         }
     }
-    
+
     // Process command-line paths
     for path_str in &args.paths {
         // REQ-2.2: Handle wildcards
@@ -257,12 +275,12 @@ fn collect_paths(args: &CountArgs) -> Result<Vec<PathBuf>> {
             }
         } else {
             let path = PathBuf::from(path_str);
-            
+
             // REQ-2.5: Validate paths
             if !path.exists() {
                 return Err(SlocError::FileNotFound { path });
             }
-            
+
             if path.is_file() {
                 paths.push(path);
             } else if path.is_dir() {
@@ -270,16 +288,19 @@ fn collect_paths(args: &CountArgs) -> Result<Vec<PathBuf>> {
                 if args.recursive {
                     collect_directory_files(&path, &mut paths)?;
                 } else {
-                    eprintln!("Warning: {} is a directory. Use -r for recursive traversal.", path.display());
+                    eprintln!(
+                        "Warning: {} is a directory. Use -r for recursive traversal.",
+                        path.display()
+                    );
                 }
             }
         }
     }
-    
+
     // REQ-9.3: Ensure deterministic output
     paths.sort();
     paths.dedup();
-    
+
     Ok(paths)
 }
 
@@ -299,31 +320,37 @@ fn collect_directory_files(dir: &Path, paths: &mut Vec<PathBuf>) -> Result<()> {
 }
 
 /// REQ-4.1: Count lines in a single file
-fn count_file(path: &Path, detector: &Arc<LanguageDetector>, ignore_preprocessor: bool) -> Result<FileStats> {
+fn count_file(
+    path: &Path,
+    detector: &Arc<LanguageDetector>,
+    ignore_preprocessor: bool,
+) -> Result<FileStats> {
     // REQ-3.2: Detect language
     let language = detector.detect(path);
-    let language_name = language.map(|l| l.name.clone()).unwrap_or_else(|| "Unknown".to_string());
-    
+    let language_name = language
+        .map(|l| l.name.clone())
+        .unwrap_or_else(|| "Unknown".to_string());
+
     // REQ-9.2: Handle different encodings
     let file = File::open(path)?;
     let reader = DecodeReaderBytesBuilder::new()
         .encoding(Some(encoding_rs::UTF_8))
         .build(file);
     let reader = BufReader::new(reader);
-    
+
     let mut total_lines = 0;
     let mut logical_lines = 0;
     let mut empty_lines = 0;
-    
+
     if let Some(lang) = language {
         let parser = CommentParser::new(lang.clone(), ignore_preprocessor);
         let mut in_multiline = false;
         let mut depth = 0;
-        
+
         for line in reader.lines() {
             let line = line?;
             total_lines += 1;
-            
+
             // REQ-4.2, REQ-4.3: Handle multi-line comments
             if parser.is_in_multiline_comment(&line, &mut in_multiline, &mut depth) {
                 // Line is part of a multi-line comment
@@ -335,7 +362,7 @@ fn count_file(path: &Path, detector: &Arc<LanguageDetector>, ignore_preprocessor
                 // REQ-4.4: Parse line type
                 match parser.parse_line(&line) {
                     LineType::Empty => empty_lines += 1,
-                    LineType::Comment => {}, // Comment but not empty
+                    LineType::Comment => {} // Comment but not empty
                     LineType::Logical | LineType::Mixed => logical_lines += 1,
                 }
             }
@@ -345,7 +372,7 @@ fn count_file(path: &Path, detector: &Arc<LanguageDetector>, ignore_preprocessor
         for line in reader.lines() {
             let line = line?;
             total_lines += 1;
-            
+
             if line.trim().is_empty() {
                 empty_lines += 1;
             } else {
@@ -353,7 +380,7 @@ fn count_file(path: &Path, detector: &Arc<LanguageDetector>, ignore_preprocessor
             }
         }
     }
-    
+
     Ok(FileStats {
         path: path.to_path_buf(),
         language: language_name,
