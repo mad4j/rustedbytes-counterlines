@@ -35,6 +35,7 @@ cargo build --release
 ### Basic Commands
 
 #### Count Lines (REQ-8.3)
+
 ```bash
 # Count lines in specific files
 sloc count src/main.rs src/lib.rs
@@ -50,6 +51,7 @@ find . -name "*.rs" | sloc count --stdin
 ```
 
 #### Generate Reports (REQ-8.3)
+
 ```bash
 # Generate JSON report (REQ-6.1)
 sloc report src/ -r -f json -o report.json
@@ -65,6 +67,7 @@ sloc report src/ -r -f json -o report.json --checksum
 ```
 
 #### Process Existing Reports (REQ-7.1)
+
 ```bash
 # Process and display statistics from a report
 sloc process report.json
@@ -77,6 +80,7 @@ sloc process report.json --export summary.json -f json
 ```
 
 #### Compare Reports (REQ-7.2)
+
 ```bash
 # Compare two reports
 sloc compare report_old.json report_new.json
@@ -113,6 +117,7 @@ sloc count src/ -r --progress
 ## Supported Languages
 
 Built-in support for (REQ-3.1):
+
 - Rust (including nested comments)
 - C/C++ (with preprocessor directives)
 - Python (including docstrings)
@@ -145,6 +150,7 @@ The tool counts three types of lines (REQ-1.1):
 ## Report Format
 
 Reports include (REQ-6.4, REQ-6.5, REQ-6.6):
+
 - Per-file statistics (path, language, lines counts)
 - Language summaries
 - Global statistics
@@ -214,6 +220,7 @@ preprocessor_prefix = "#"
 ## Console Output
 
 The tool provides formatted console output with (REQ-5.1, REQ-5.2, REQ-5.3):
+
 - Color-coded tables
 - Thousands separators
 - Percentage calculations
@@ -221,7 +228,7 @@ The tool provides formatted console output with (REQ-5.1, REQ-5.2, REQ-5.3):
 
 ### Example Output
 
-```
+```text
 ════════════════════════════════════════════════════════════════════════════════
 Source Lines of Code (SLOC) Report
 ════════════════════════════════════════════════════════════════════════════════
@@ -254,6 +261,7 @@ Language Summary
 ## Error Handling
 
 The tool provides clear error messages for (REQ-2.5):
+
 - Invalid or inaccessible paths
 - Unsupported file formats
 - Permission issues
@@ -262,6 +270,7 @@ The tool provides clear error messages for (REQ-2.5):
 ## Contributing
 
 Contributions are welcome! Please ensure that:
+
 1. All existing tests pass
 2. New features include tests
 3. Code follows Rust conventions

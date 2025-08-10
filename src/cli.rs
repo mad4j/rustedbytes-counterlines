@@ -7,7 +7,6 @@ use std::path::PathBuf;
 #[derive(Parser)]
 #[command(author, version, about, long_about = None)]
 #[command(propagate_version = true)]
-
 pub struct Cli {
     /// REQ-8.2: Display help via --help or -h
     #[command(subcommand)]
@@ -233,7 +232,7 @@ pub enum SortMetric {
 fn parse_language_override(s: &str) -> Result<(String, String), String> {
     let parts: Vec<&str> = s.split('=').collect();
     if parts.len() != 2 {
-        return Err(format!("Invalid format. Use: ext=language"));
+        return Err("Invalid format. Use: ext=language".to_string());
     }
     Ok((parts[0].to_string(), parts[1].to_string()))
 }

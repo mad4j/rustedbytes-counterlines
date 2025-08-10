@@ -11,6 +11,7 @@ use num_format::{Locale, ToFormattedString};
 use prettytable::{Cell, Row, Table};
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
+use std::path::Path;
 use std::sync::Arc;
 use std::time::Instant;
 
@@ -163,7 +164,7 @@ pub fn execute_compare(args: CompareArgs) -> Result<()> {
     Ok(())
 }
 
-fn detect_format(path: &std::path::PathBuf) -> OutputFormat {
+fn detect_format(path: &Path) -> OutputFormat {
     match path.extension().and_then(|e| e.to_str()) {
         Some("json") => OutputFormat::Json,
         Some("xml") => OutputFormat::Xml,
@@ -280,8 +281,8 @@ impl ComparisonResult {
             .collect::<std::collections::HashSet<_>>();
 
         for language in all_languages {
-            let stats1 = lang1.get(&*language);
-            let stats2 = lang2.get(&*language);
+            let stats1 = lang1.get(language);
+            let stats2 = lang2.get(language);
 
             let delta = LanguageDelta {
                 language: language.to_string(),
@@ -497,7 +498,7 @@ fn export_comparison(
             // CSV export for comparison - simplified format
             let mut wtr = csv::Writer::from_path(path)
                 .map_err(|e| SlocError::Serialization(e.to_string()))?;
-            wtr.write_record(&[
+            wtr.write_record([
                 "Type",
                 "Name",
                 "Files Delta",
@@ -508,7 +509,7 @@ fn export_comparison(
             .map_err(|e| SlocError::Serialization(e.to_string()))?;
 
             // Global
-            wtr.write_record(&[
+            wtr.write_record([
                 "Global",
                 "Summary",
                 &comparison.global_delta.files_delta.to_string(),
@@ -520,7 +521,7 @@ fn export_comparison(
 
             // Languages
             for lang in &comparison.language_deltas {
-                wtr.write_record(&[
+                wtr.write_record([
                     "Language",
                     &lang.language,
                     &lang.files_delta.to_string(),

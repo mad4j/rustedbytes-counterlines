@@ -256,14 +256,13 @@ impl ReportExporter {
     /// REQ-6.3: Export as CSV
     fn export_csv(&self, report: &Report, path: &Path) -> Result<()> {
         let mut wtr = csv::Writer::from_path(path).map_err(|e| {
-            SlocError::Io(std::io::Error::new(
-                std::io::ErrorKind::Other,
+            SlocError::Io(std::io::Error::other(
                 e.to_string(),
             ))
         })?;
 
         // Write header
-        wtr.write_record(&[
+        wtr.write_record([
             "Path",
             "Language",
             "Total Lines",
@@ -271,8 +270,7 @@ impl ReportExporter {
             "Empty Lines",
         ])
         .map_err(|e| {
-            SlocError::Io(std::io::Error::new(
-                std::io::ErrorKind::Other,
+            SlocError::Io(std::io::Error::other(
                 e.to_string(),
             ))
         })?;
@@ -287,16 +285,14 @@ impl ReportExporter {
                 file.empty_lines.to_string(),
             ])
             .map_err(|e| {
-                SlocError::Io(std::io::Error::new(
-                    std::io::ErrorKind::Other,
+                SlocError::Io(std::io::Error::other(
                     e.to_string(),
                 ))
             })?;
         }
 
         wtr.flush().map_err(|e| {
-            SlocError::Io(std::io::Error::new(
-                std::io::ErrorKind::Other,
+            SlocError::Io(std::io::Error::other(
                 e.to_string(),
             ))
         })?;
