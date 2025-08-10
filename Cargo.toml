@@ -16,8 +16,12 @@ exclude = [
     "examples/*",
     ".github/*",
     "*.log",
-    "target/*"
+    "target/*",
+    "resources/*"
 ]
+
+[target.'cfg(windows)'.build-dependencies]
+winres = "0.1.12"
 
 [dependencies]
 # CLI argument parsing (REQ-8.1, REQ-8.2)
