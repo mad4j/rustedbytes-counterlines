@@ -340,7 +340,7 @@ impl ReportExporter {
 
         // REQ-3.5: Add unsupported files section
         if !report.unsupported_files.is_empty() {
-            wtr.write_record(&["--- Unsupported Files (not counted) ---"])
+            wtr.write_record(["--- Unsupported Files (not counted) ---"])
                 .map_err(|e| SlocError::Io(std::io::Error::other(e.to_string())))?;
             for path in &report.unsupported_files {
                 wtr.write_record(&[path.to_string_lossy().to_string()])
