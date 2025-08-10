@@ -73,71 +73,62 @@ impl ConsoleOutput {
         table.add_row(Row::new(vec![
             Cell::new("Metric").style_spec("b"),
             Cell::new("Value").style_spec("br"),
+            Cell::new("% ").style_spec("br"),
         ]));
 
-        // REQ-5.3: Format with thousands separators
+        let total_lines = report.summary.total_lines as f64;
 
+        // Total Files
         table.add_row(Row::new(vec![
             Cell::new("Total Files"),
             Cell::new(&report.summary.total_files.to_formatted_string(&Locale::en)).style_spec("r"),
+            Cell::new("").style_spec("r"),
         ]));
+        // Unsupported Files
         table.add_row(Row::new(vec![
             Cell::new("Unsupported Files"),
             Cell::new(&report.summary.unsupported_files.to_formatted_string(&Locale::en)).style_spec("r"),
+            Cell::new("").style_spec("r"),
         ]));
-
+        // Total Lines
         table.add_row(Row::new(vec![
             Cell::new("Total Lines"),
             Cell::new(&report.summary.total_lines.to_formatted_string(&Locale::en)).style_spec("r"),
+            Cell::new("100.00 %").style_spec("r"),
         ]));
-
+        // Logical Lines
+        let logical_pct = if total_lines > 0.0 {
+            (report.summary.logical_lines as f64 / total_lines) * 100.0
+        } else { 0.0 };
         table.add_row(Row::new(vec![
             Cell::new("Logical Lines"),
-            Cell::new(
-                &report
-                    .summary
-                    .logical_lines
-                    .to_formatted_string(&Locale::en),
-            ).style_spec("r"),
+            Cell::new(&report.summary.logical_lines.to_formatted_string(&Locale::en)).style_spec("r"),
+            Cell::new(&format!("{:.2} %", logical_pct)).style_spec("r"),
         ]));
-
+        // Comment Lines
+        let comment_pct = if total_lines > 0.0 {
+            (report.summary.comment_lines as f64 / total_lines) * 100.0
+        } else { 0.0 };
         table.add_row(Row::new(vec![
             Cell::new("Comment Lines"),
             Cell::new(&report.summary.comment_lines.to_formatted_string(&Locale::en)).style_spec("r"),
+            Cell::new(&format!("{:.2} %", comment_pct)).style_spec("r"),
         ]));
-
+        // Empty Lines
+        let empty_pct = if total_lines > 0.0 {
+            (report.summary.empty_lines as f64 / total_lines) * 100.0
+        } else { 0.0 };
         table.add_row(Row::new(vec![
             Cell::new("Empty Lines"),
             Cell::new(&report.summary.empty_lines.to_formatted_string(&Locale::en)).style_spec("r"),
+            Cell::new(&format!("{:.2} %", empty_pct)).style_spec("r"),
         ]));
-
+        // Languages
         table.add_row(Row::new(vec![
             Cell::new("Languages"),
-            Cell::new(
-                &report
-                    .summary
-                    .languages_count
-                    .to_formatted_string(&Locale::en),
-            ).style_spec("r"),
+            Cell::new(&report.summary.languages_count.to_formatted_string(&Locale::en)).style_spec("r"),
+            Cell::new("").style_spec("r"),
         ]));
-
-        // REQ-5.3: Calculate and display percentages with 2 decimal places
-        if report.summary.total_lines > 0 {
-            let logical_pct =
-                (report.summary.logical_lines as f64 / report.summary.total_lines as f64) * 100.0;
-            let empty_pct =
-                (report.summary.empty_lines as f64 / report.summary.total_lines as f64) * 100.0;
-
-            table.add_row(Row::new(vec![
-                Cell::new("Code Density"),
-                Cell::new(&format!("{:.2}%", logical_pct)),
-            ]));
-
-            table.add_row(Row::new(vec![
-                Cell::new("Empty Ratio"),
-                Cell::new(&format!("{:.2}%", empty_pct)),
-            ]));
-        }
 
         table.printstd();
     }
@@ -186,7 +177,7 @@ impl ConsoleOutput {
                 Cell::new(&lang.logical_lines.to_formatted_string(&Locale::en)).style_spec("r"),
                 Cell::new(&lang.comment_lines.to_formatted_string(&Locale::en)).style_spec("r"),
                 Cell::new(&lang.empty_lines.to_formatted_string(&Locale::en)).style_spec("r"),
-                Cell::new(&format!("{:.2}", density)).style_spec("r"),
+                Cell::new(&format!("{:.2} %", density)).style_spec("r"),
             ]));
         }
 
