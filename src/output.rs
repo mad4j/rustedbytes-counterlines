@@ -46,7 +46,7 @@ impl ConsoleOutput {
             );
         }
 
-        // REQ-3.5: Display unsupported files
+    // REQ-3.5.3: Display unsupported files separately
         if !report.unsupported_files.is_empty() {
             println!("\n{}", "Unsupported Files (not counted):".bold().red());
             for path in &report.unsupported_files {

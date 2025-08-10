@@ -50,7 +50,9 @@ The terms **SHALL**, **SHOULD**, and **MAY** are to be interpreted per [RFC 2119
 
 - **REQ-3.4** — The tool **MAY** allow users to override detected language for specific files.
 
-- **REQ-3.5** — The tool **SHALL** exclude from statistics any files whose syntax is not supported (i.e., for which no language definition is available). These files SHALL NOT be included in line counts or language summaries, but SHALL be listed separately in the output and reports.
+- **REQ-3.5.1** — The tool **SHALL** exclude from all statistics any files whose syntax is not supported (i.e., for which no language definition is available).
+- **REQ-3.5.2** — Files with unsupported syntax **SHALL NOT** be included in line counts or language summaries.
+- **REQ-3.5.3** — Files with unsupported syntax **SHALL** be listed separately in the console output and in all report formats.
 
 ---
 
