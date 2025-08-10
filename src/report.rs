@@ -14,7 +14,8 @@ use std::sync::Arc;
 use std::time::Instant;
 
 /// REQ-6.6: Report format version
-const REPORT_FORMAT_VERSION: &str = "1.0";
+// Use version from Cargo.toml at compile time
+pub const REPORT_FORMAT_VERSION: &str = env!("CARGO_PKG_VERSION");
 
 /// REQ-6.4: File statistics
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -228,6 +229,7 @@ pub fn execute_report(args: ReportArgs) -> Result<()> {
 
     // Convert ReportArgs to CountArgs for reuse
     let count_args = crate::cli::CountArgs {
+        details: args.details,
         paths: args.paths,
         recursive: args.recursive,
         stdin: false,

@@ -49,7 +49,7 @@ pub fn execute_process(args: ProcessArgs) -> Result<()> {
 
     // Display summary (REQ-7.1: compute global statistics)
     let console_start = Instant::now();
-    let console = ConsoleOutput::new(args.sort);
+    let console = ConsoleOutput::new(args.sort, false);
     console.display_summary(&report)?;
     metrics_logger.log_metric(
         "console_display_time",

@@ -5,6 +5,7 @@ use clap::{Parser, Subcommand, ValueEnum};
 use std::path::PathBuf;
 
 #[derive(Parser)]
+#[command(name = env!("CARGO_PKG_NAME"))]
 #[command(author, version, about, long_about = None)]
 #[command(propagate_version = true)]
 pub struct Cli {
@@ -34,6 +35,9 @@ pub enum Commands {
 
 #[derive(Parser)]
 pub struct CountArgs {
+    /// Print per-file statistics and unsupported file list (default: false)
+    #[arg(long)]
+    pub details: bool,
     // REQ-2.1: Accept file and/or directory paths
     // REQ-2.2: Accept wildcards
     /// Paths to files or directories to count
@@ -111,6 +115,9 @@ pub struct CountArgs {
 
 #[derive(Parser)]
 pub struct ReportArgs {
+    /// Print per-file statistics and unsupported file list (default: false)
+    #[arg(long)]
+    pub details: bool,
     /// Paths to files or directories to count
     #[arg(required = true)]
     pub paths: Vec<String>,

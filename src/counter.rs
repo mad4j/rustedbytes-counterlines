@@ -200,7 +200,7 @@ pub fn execute_count(args: CountArgs) -> Result<()> {
 
     // REQ-5.1, REQ-5.2, REQ-5.3: Console output
     let console_start = Instant::now();
-    let console = ConsoleOutput::new(args.sort);
+    let console = ConsoleOutput::new(args.sort, args.details);
     console.display_summary(&report)?;
     metrics_logger.log_metric("console_output_time", console_start.elapsed().as_secs_f64());
 

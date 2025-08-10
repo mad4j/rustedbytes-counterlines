@@ -45,6 +45,9 @@ sloc count "src/*.rs" "tests/*.rs"
 # Recursive directory traversal (REQ-2.3)
 sloc count src/ -r
 
+# Show per-file statistics and unsupported file list (only if requested)
+sloc count src/ -r --details
+
 # Read file list from stdin (REQ-2.4)
 find . -name "*.rs" | sloc count --stdin
 ```
@@ -63,7 +66,12 @@ sloc report src/ -r -f csv -o report.csv
 
 # Include checksum (REQ-6.9)
 sloc report src/ -r -f json -o report.json --checksum
+
+# Show per-file statistics and unsupported file list in console (only if requested)
+sloc report src/ -r -f json -o report.json --details
 ```
+
+> **Note:** By default, the tool prints only summary and language statistics. Use `--details` to print per-file statistics and the list of unsupported files in the console output.
 
 #### Process Existing Reports (REQ-7.1)
 
@@ -118,6 +126,7 @@ sloc count src/ -r --progress
 Built-in support for (REQ-3.1):
 
 Files for which no language definition is available are:
+
 - **Excluded from all statistics and summaries** (REQ-3.5.1)
 - **Not included in line or language counts** (REQ-3.5.2)
 - **Listed separately** in the console output and reports (REQ-3.5.3)

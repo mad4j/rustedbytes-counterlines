@@ -43,6 +43,7 @@ cargo run -- count src/ --config config.toml
 ## Unsupported Files (REQ-3.5.1, REQ-3.5.2, REQ-3.5.3)
 
 Files with unsupported syntax (no language definition):
+
 - **Are excluded from all statistics and metrics** (REQ-3.5.1)
 - **Are not included in any line, file, or language counts** (REQ-3.5.2)
 - **Are listed separately** in the console output and reports (REQ-3.5.3)

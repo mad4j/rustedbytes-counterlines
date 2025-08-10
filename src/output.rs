@@ -13,11 +13,12 @@ use std::path::Path;
 
 pub struct ConsoleOutput {
     sort_metric: Option<SortMetric>,
+    details: bool,
 }
 
 impl ConsoleOutput {
-    pub fn new(sort_metric: Option<SortMetric>) -> Self {
-        Self { sort_metric }
+    pub fn new(sort_metric: Option<SortMetric>, details: bool) -> Self {
+        Self { sort_metric, details }
     }
 
     /// REQ-5.1, REQ-5.2, REQ-5.3: Display summary tables
@@ -32,25 +33,26 @@ impl ConsoleOutput {
         // Language summary (REQ-5.2)
         self.display_language_summary(report);
 
-        // File details if not too many
-        if report.files.len() <= 20 {
-            self.display_file_details(report);
-        } else {
-            println!(
-                "\n{}",
-                format!(
-                    "({} files processed, use --sort to see details)",
-                    report.files.len()
-                )
-                .yellow()
-            );
-        }
-
-    // REQ-3.5.3: Display unsupported files separately
-        if !report.unsupported_files.is_empty() {
-            println!("\n{}", "Unsupported Files (not counted):".bold().red());
-            for path in &report.unsupported_files {
-                println!("  - {}", path.display());
+        // File details and unsupported files only if --details is set
+        if self.details {
+            if report.files.len() <= 20 {
+                self.display_file_details(report);
+            } else {
+                println!(
+                    "\n{}",
+                    format!(
+                        "({} files processed, use --sort to see details)",
+                        report.files.len()
+                    )
+                    .yellow()
+                );
+            }
+            // REQ-3.5.3: Display unsupported files separately
+            if !report.unsupported_files.is_empty() {
+                println!("\n{}", "Unsupported Files (not counted):".bold().red());
+                for path in &report.unsupported_files {
+                    println!("  - {}", path.display());
+                }
             }
         }
 
