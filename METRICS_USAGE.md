@@ -40,7 +40,9 @@ Use with:
 cargo run -- count src/ --config config.toml
 ```
 
-## Metrics Output Format
+## Unsupported Files (REQ-3.5)
+
+Files with unsupported syntax (no language definition) are **excluded from all statistics and metrics**. They are **listed separately** in the console output and reports, and are not included in any line, file, or language counts.
 
 The metrics log contains timestamped entries showing:
 
@@ -76,6 +78,8 @@ Tool version: 0.1.0
 ```
 
 ## Logged Metrics
+
+> Note: Metrics and statistics do **not** include unsupported files (REQ-3.5). These files are only listed separately.
 
 ### System Information
 

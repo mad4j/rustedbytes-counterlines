@@ -1,5 +1,5 @@
 // counter.rs - Core line counting logic
-// Implements: REQ-1.1 (incl. comment lines), REQ-2.1, REQ-2.2, REQ-2.3, REQ-2.4, REQ-4.1, REQ-4.2, REQ-4.3, REQ-4.4, REQ-4.5, REQ-9.2, REQ-9.4, REQ-9.5, REQ-9.7
+// Implements: REQ-1.1 (incl. comment lines), REQ-2.1, REQ-2.2, REQ-2.3, REQ-2.4, REQ-3.5, REQ-4.1, REQ-4.2, REQ-4.3, REQ-4.4, REQ-4.5, REQ-9.2, REQ-9.4, REQ-9.5, REQ-9.7
 
 use crate::cli::CountArgs;
 use crate::config::{AppConfig, MetricsLogger};
@@ -102,51 +102,56 @@ pub fn execute_count(args: CountArgs) -> Result<()> {
     let metrics_clone = Arc::clone(&metrics_logger);
 
     let processing_start = Instant::now();
-    let results: Vec<FileStats> = paths
-        .par_iter()
-        .filter_map(|path| {
-            let file_start = Instant::now();
-            let result = count_file(path, &detector, ignore_preprocessor);
+    let file_results: Vec<_> = paths.par_iter().map(|path| {
+        let file_start = Instant::now();
+        let result = count_file(path, &detector, ignore_preprocessor);
 
-            // Log per-file metrics
-            if let Ok(ref stats) = result {
-                let file_time = file_start.elapsed().as_secs_f64();
-                if file_time > 0.001 {
-                    // Only log if processing took more than 1ms
-                    metrics_clone.log_metric(
-                        &format!(
-                            "file_process_time_{}",
-                            path.file_name()
-                                .and_then(|n| n.to_str())
-                                .unwrap_or("unknown")
-                        ),
-                        file_time,
-                    );
-                }
-
-                // Log throughput for large files
-                if stats.total_lines > 1000 {
-                    let throughput = stats.total_lines as f64 / file_time;
-                    metrics_clone.log_metric("large_file_throughput", throughput);
-                }
+        // Log per-file metrics
+        if let Ok(ref stats) = result {
+            let file_time = file_start.elapsed().as_secs_f64();
+            if file_time > 0.001 {
+                metrics_clone.log_metric(
+                    &format!(
+                        "file_process_time_{}",
+                        path.file_name()
+                            .and_then(|n| n.to_str())
+                            .unwrap_or("unknown")
+                    ),
+                    file_time,
+                );
             }
-
-            if let Some(ref pb) = progress {
-                let pb = pb.lock().unwrap();
-                pb.inc(1);
-                pb.set_message(format!("Processing: {}", path.display()));
+            if stats.total_lines > 1000 {
+                let throughput = stats.total_lines as f64 / file_time;
+                metrics_clone.log_metric("large_file_throughput", throughput);
             }
+        }
 
-            match result {
-                Ok(stats) => Some(stats),
-                Err(e) => {
-                    eprintln!("Error processing {}: {}", path.display(), e);
-                    metrics_clone.log_metric("file_errors", 1.0);
-                    None
+        if let Some(ref pb) = progress {
+            let pb = pb.lock().unwrap();
+            pb.inc(1);
+            pb.set_message(format!("Processing: {}", path.display()));
+        }
+
+        match result {
+            Ok(stats) => {
+                if stats.language == "Unknown" {
+                    Err(path.clone())
+                } else {
+                    Ok(stats)
                 }
             }
-        })
-        .collect();
+            Err(e) => {
+                eprintln!("Error processing {}: {}", path.display(), e);
+                metrics_clone.log_metric("file_errors", 1.0);
+                // treat as unsupported for reporting
+                Err(path.clone())
+            }
+        }
+    }).collect();
+
+    let (results, unsupported_files): (Vec<_>, Vec<_>) = file_results.into_iter().partition(|res| res.is_ok());
+    let results: Vec<FileStats> = results.into_iter().map(|r| r.unwrap()).collect();
+    let unsupported_files: Vec<PathBuf> = unsupported_files.into_iter().map(|e| e.unwrap_err()).collect();
 
     let processing_time = processing_start.elapsed();
     metrics_logger.log_metric("total_processing_time", processing_time.as_secs_f64());
@@ -177,7 +182,7 @@ pub fn execute_count(args: CountArgs) -> Result<()> {
 
     // Create report (REQ-6.4, REQ-6.5, REQ-6.6)
     let report_creation_start = Instant::now();
-    let mut report = Report::new(results);
+    let mut report = Report::new(results, unsupported_files);
     metrics_logger.log_metric(
         "report_creation_time",
         report_creation_start.elapsed().as_secs_f64(),

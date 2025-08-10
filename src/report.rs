@@ -43,6 +43,7 @@ pub struct LanguageStats {
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 /// REQ-6.4, REQ-6.5, REQ-6.6, REQ-6.7: Report structure (includes comment lines per REQ-1.1)
+/// REQ-6.4, REQ-6.5, REQ-6.6, REQ-6.7, REQ-3.5: Report structure (includes unsupported files)
 pub struct Report {
     /// REQ-6.6: Report format version
     pub report_format_version: String,
@@ -58,6 +59,9 @@ pub struct Report {
 
     /// Global summary
     pub summary: GlobalSummary,
+
+    /// REQ-3.5: List of unsupported files (excluded from statistics)
+    pub unsupported_files: Vec<std::path::PathBuf>,
 
     /// REQ-6.9: Optional checksum
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -77,7 +81,7 @@ pub struct GlobalSummary {
 
 impl Report {
     /// Create a new report from file statistics
-    pub fn new(files: Vec<FileStats>) -> Self {
+    pub fn new(files: Vec<FileStats>, unsupported_files: Vec<std::path::PathBuf>) -> Self {
         let languages = Self::calculate_language_stats(&files);
         let summary = Self::calculate_summary(&files, &languages);
 
@@ -87,6 +91,7 @@ impl Report {
             files,
             languages,
             summary,
+            unsupported_files,
             checksum: None,
         }
     }
@@ -193,7 +198,7 @@ impl Report {
             files.push(file);
         }
 
-        Ok(Self::new(files))
+    Ok(Self::new(files, Vec::new()))
     }
 }
 

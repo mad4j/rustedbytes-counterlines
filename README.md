@@ -6,9 +6,8 @@
 
 A high-performance, multi-language source code line counter written in Rust that fully implements the requirements specified in REQUIREMENTS.md.
 
-## Features
-
 - **Multi-language support** with extensible language definitions (REQ-3.1, REQ-3.3)
+- **Excludes unsupported files** from statistics and lists them separately (REQ-3.5)
 - **Accurate line counting** differentiating between total, logical, and empty lines (REQ-1.1)
 - **Multiple output formats**: JSON, XML, CSV (REQ-6.1, REQ-6.2, REQ-6.3)
 - **Report processing and comparison** without rescanning files (REQ-7.1, REQ-7.2)
@@ -114,9 +113,11 @@ sloc count src/ -r -j 8
 sloc count src/ -r --progress
 ```
 
-## Supported Languages
+## Supported Languages & Unsupported Files
 
 Built-in support for (REQ-3.1):
+
+Files for which no language definition is available are **excluded from all statistics and summaries**. These files are **listed separately** in the console output and reports, so you can review which files were not counted.
 
 - Rust (including nested comments)
 - C/C++ (with preprocessor directives)
@@ -267,7 +268,7 @@ Language Summary
 The tool provides clear error messages for (REQ-2.5):
 
 - Invalid or inaccessible paths
-- Unsupported file formats
+- Unsupported file formats (listed separately, not counted; see REQ-3.5)
 - Permission issues
 - Encoding problems
 
@@ -290,7 +291,7 @@ This implementation fully complies with all requirements specified in REQUIREMEN
 
 - ✅ Purpose (REQ-1.x): Complete line counting functionality, including comment lines
 - ✅ Input Handling (REQ-2.x): Flexible input methods
-- ✅ Language Support (REQ-3.x): Extensible multi-language support
+- ✅ Language Support (REQ-3.x, REQ-3.5): Extensible multi-language support, unsupported files excluded from statistics and listed separately
 - ✅ Counting Rules (REQ-4.x): Accurate line and comment classification
 - ✅ Console Output (REQ-5.x): Formatted, sortable output
 - ✅ Report Generation (REQ-6.x): Multiple export formats

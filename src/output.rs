@@ -46,6 +46,14 @@ impl ConsoleOutput {
             );
         }
 
+        // REQ-3.5: Display unsupported files
+        if !report.unsupported_files.is_empty() {
+            println!("\n{}", "Unsupported Files (not counted):".bold().red());
+            for path in &report.unsupported_files {
+                println!("  - {}", path.display());
+            }
+        }
+
         // Display checksum if present
         if let Some(checksum) = &report.checksum {
             println!("\n{}: {}", "Checksum".bold(), checksum.green());
@@ -300,6 +308,14 @@ impl ReportExporter {
                     e.to_string(),
                 ))
             })?;
+        }
+
+        // REQ-3.5: Add unsupported files section
+        if !report.unsupported_files.is_empty() {
+            wtr.write_record(&["--- Unsupported Files (not counted) ---"]).map_err(|e| SlocError::Io(std::io::Error::other(e.to_string())))?;
+            for path in &report.unsupported_files {
+                wtr.write_record(&[path.to_string_lossy().to_string()]).map_err(|e| SlocError::Io(std::io::Error::other(e.to_string())))?;
+            }
         }
 
         wtr.flush().map_err(|e| {

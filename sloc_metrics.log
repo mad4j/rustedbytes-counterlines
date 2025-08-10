@@ -109,3 +109,55 @@ Tool version: 0.1.0
 
 [0.055s] total_operation_time: 0.053
 [0.055s] memory_usage_estimate_bytes: 2328.000
+
+=== SLOC Metrics Session Started ===
+Operation: count
+Timestamp: 2025-08-10 07:32:07 UTC
+Args: paths=1, recursive=true, threads=0, format=None
+[0.001s] system_cpu_count: 12.000
+[0.001s] system_available_parallelism: 12.000
+Tool version: 0.1.0
+[0.002s] operation_start: 0.002
+[0.002s] language_overrides_count: 0.000
+[0.004s] path_collection_time: 0.001
+[0.004s] total_files_to_process: 25.000
+[0.006s] thread_count: 12.000
+[0.008s] file_process_time_leo_log_light_tests_concur.c: 0.001
+[0.008s] file_process_time_leo_log_light_simple_backend.c: 0.001
+[0.008s] file_process_time_lll_portability.c: 0.001
+[0.008s] file_process_time_lll_buffered_backend.h: 0.001
+[0.008s] file_process_time_out.txt: 0.001
+[0.008s] file_process_time_lll: 0.002
+[0.009s] file_process_time_test-concur.log: 0.002
+[0.009s] large_file_throughput: 1664328.657
+[0.012s] file_process_time_lll_buffered_backend.c: 0.001
+[0.014s] file_process_time_utest.h: 0.002
+[0.014s] large_file_throughput: 901364.113
+[0.015s] file_process_time_test-log_10000.log: 0.007
+[0.016s] large_file_throughput: 1369973.704
+[0.016s] file_process_time_test-concur.log.bak: 0.002
+[0.017s] large_file_throughput: 1492735.611
+[0.017s] file_process_time_test-log_10000.log.bak: 0.006
+[0.017s] large_file_throughput: 1619132.405
+[0.019s] file_process_time_test-susp_resum.log: 0.012
+[0.019s] large_file_throughput: 1623031.552
+[0.025s] file_process_time_test-susp_resum.log.bak: 0.012
+[0.025s] large_file_throughput: 1622277.212
+[0.026s] total_processing_time: 0.020
+[0.027s] files_processed_successfully: 12.000
+[0.027s] total_lines_processed: 3261.000
+[0.028s] logical_lines_processed: 2206.000
+[0.028s] comment_lines_processed: 250.000
+[0.029s] empty_lines_processed: 597.000
+[0.029s] overall_throughput_lines_per_sec: 165855.445
+[0.029s] files_per_second: 610.324
+[0.030s] report_creation_time: 0.000
+[0.063s] console_output_time: 0.032
+[0.064s] total_files: 12.000
+[0.064s] total_lines: 3261.000
+[0.064s] elapsed_seconds: 0.064
+[0.065s] lines_per_second: 0.000
+=== Session Completed ===
+
+[0.066s] total_operation_time: 0.064
+[0.066s] memory_usage_estimate_bytes: 1120.000
