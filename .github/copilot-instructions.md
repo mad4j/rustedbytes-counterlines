@@ -37,8 +37,8 @@ Count lines in files and directories:
 # Count with recursive directory traversal
 ./target/release/rustedbytes-counterlines count src/ --recursive
 
-# Show progress bar for large operations
-./target/release/rustedbytes-counterlines count . --recursive --progress
+# Progress bar enabled by default. Use --no-progress to disable
+./target/release/rustedbytes-counterlines count . --recursive --no-progress
 
 # Enable performance metrics logging
 ./target/release/rustedbytes-counterlines count src/ --recursive --enable-metrics
@@ -92,7 +92,7 @@ Compare two reports:
 - Tool processes ~1.5-2.0 million lines per second
 - Processing 12 source files (2,900 lines) takes <3ms
 - Uses parallel processing (default: number of CPU cores)
-- Progress indicators available for large operations with --progress
+- Progress indicators enabled by default for all operations
 
 ### Memory Usage
 - Memory efficient: streams files instead of loading entirely into memory
@@ -122,7 +122,7 @@ Compare two reports:
 
 4. **Performance features**: Test metrics and progress indicators
    ```bash
-   ./target/release/rustedbytes-counterlines count src/ --recursive --enable-metrics --progress
+   ./target/release/rustedbytes-counterlines count src/ --recursive --enable-metrics
    ```
 
 ## Validation and Quality Assurance
@@ -215,6 +215,6 @@ cargo fmt --check && cargo clippy --all-targets --all-features          # Valida
 ### Output Issues
 - XML export is known to fail - use JSON or CSV instead
 - Large directory scans may include unwanted files (use specific paths)
-- Progress indicators require `--progress` flag for visibility
+- Progress indicators enabled by default (use --no-progress to disable)
 
 Remember: Always build first, test core functionality, and validate with the scenarios above before considering changes complete.
