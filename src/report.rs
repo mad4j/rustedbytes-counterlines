@@ -213,7 +213,7 @@ impl Report {
             files.push(file);
         }
 
-    Ok(Self::new(files, Vec::new()))
+        Ok(Self::new(files, Vec::new()))
     }
 }
 

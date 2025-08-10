@@ -19,11 +19,11 @@ use crate::config::{AppConfig, MetricsLogger};
 use crate::error::{Result, SlocError};
 use crate::language::{CommentParser, LanguageDetector, LineType};
 use crate::output::{ConsoleOutput, ReportExporter};
-use human_format::Formatter;
 use crate::report::{FileStats, Report};
 use colored::Colorize;
 use encoding_rs_io::DecodeReaderBytesBuilder;
 use glob::glob;
+use human_format::Formatter;
 use indicatif::{ProgressBar, ProgressStyle};
 use rayon::prelude::*;
 use std::fs::File;
@@ -116,56 +116,63 @@ pub fn execute_count(args: CountArgs) -> Result<()> {
     let metrics_clone = Arc::clone(&metrics_logger);
 
     let processing_start = Instant::now();
-    let file_results: Vec<_> = paths.par_iter().map(|path| {
-        let file_start = Instant::now();
-        let result = count_file(path, &detector, ignore_preprocessor);
+    let file_results: Vec<_> = paths
+        .par_iter()
+        .map(|path| {
+            let file_start = Instant::now();
+            let result = count_file(path, &detector, ignore_preprocessor);
 
-        // Log per-file metrics
-        if let Ok(ref stats) = result {
-            let file_time = file_start.elapsed().as_secs_f64();
-            if file_time > 0.001 {
-                metrics_clone.log_metric(
-                    &format!(
-                        "file_process_time_{}",
-                        path.file_name()
-                            .and_then(|n| n.to_str())
-                            .unwrap_or("unknown")
-                    ),
-                    file_time,
-                );
-            }
-            if stats.total_lines > 1000 {
-                let throughput = stats.total_lines as f64 / file_time;
-                metrics_clone.log_metric("large_file_throughput", throughput);
-            }
-        }
-
-        if let Some(ref pb) = progress {
-            let pb = pb.lock().unwrap();
-            pb.inc(1);
-            pb.set_message(format!("Processing: {}", path.display()));
-        }
-
-        match result {
-            Ok(stats) => {
-                if stats.language == "Unknown" {
-                    Err(path.clone())
-                } else {
-                    Ok(stats)
+            // Log per-file metrics
+            if let Ok(ref stats) = result {
+                let file_time = file_start.elapsed().as_secs_f64();
+                if file_time > 0.001 {
+                    metrics_clone.log_metric(
+                        &format!(
+                            "file_process_time_{}",
+                            path.file_name()
+                                .and_then(|n| n.to_str())
+                                .unwrap_or("unknown")
+                        ),
+                        file_time,
+                    );
+                }
+                if stats.total_lines > 1000 {
+                    let throughput = stats.total_lines as f64 / file_time;
+                    metrics_clone.log_metric("large_file_throughput", throughput);
                 }
             }
-            Err(e) => {
-                eprintln!("Error processing {}: {}", path.display(), e);
-                metrics_clone.log_metric("file_errors", 1.0);
-                // treat as unsupported for reporting
-                Err(path.clone())
-            }
-        }
-    }).collect();
 
-    let (results, unsupported_files): (Vec<_>, Vec<_>) = file_results.into_iter().partition(|res| res.is_ok());
+            if let Some(ref pb) = progress {
+                let pb = pb.lock().unwrap();
+                pb.inc(1);
+                pb.set_message(format!("Processing: {}", path.display()));
+            }
+
+            match result {
+                Ok(stats) => {
+                    if stats.language == "Unknown" {
+                        Err(path.clone())
+                    } else {
+                        Ok(stats)
+                    }
+                }
+                Err(e) => {
+                    eprintln!("Error processing {}: {}", path.display(), e);
+                    metrics_clone.log_metric("file_errors", 1.0);
+                    // treat as unsupported for reporting
+                    Err(path.clone())
+                }
+            }
+        })
+        .collect();
+
+    let (results, unsupported_files): (Vec<_>, Vec<_>) =
+        file_results.into_iter().partition(|res| res.is_ok());
     let results: Vec<FileStats> = results.into_iter().map(|r| r.unwrap()).collect();
-    let unsupported_files: Vec<PathBuf> = unsupported_files.into_iter().map(|e| e.unwrap_err()).collect();
+    let unsupported_files: Vec<PathBuf> = unsupported_files
+        .into_iter()
+        .map(|e| e.unwrap_err())
+        .collect();
 
     let processing_time = processing_start.elapsed();
     metrics_logger.log_metric("total_processing_time", processing_time.as_secs_f64());
@@ -242,13 +249,16 @@ pub fn execute_count(args: CountArgs) -> Result<()> {
     // REQ-9.7: Output performance: lines/sec (always, regardless of params, human readable)
     let elapsed_secs = total_time.as_secs_f64();
     let total_lines = report.summary.total_lines as f64;
-    let lines_per_sec = if elapsed_secs > 0.0 { total_lines / elapsed_secs } else { 0.0 };
+    let lines_per_sec = if elapsed_secs > 0.0 {
+        total_lines / elapsed_secs
+    } else {
+        0.0
+    };
     let thread_count = rayon::current_num_threads();
     let perf_str = Formatter::new().with_decimals(2).format(lines_per_sec);
     println!(
         "Performance: {} lines/sec ({} threads)",
-        perf_str,
-        thread_count
+        perf_str, thread_count
     );
     // Performance summary for large operations
     if total_time.as_secs() >= args.perf_summary_threshold || report.summary.total_files > 1000 {

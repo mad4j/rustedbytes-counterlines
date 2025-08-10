@@ -26,7 +26,10 @@ pub struct ConsoleOutput {
 
 impl ConsoleOutput {
     pub fn new(sort_metric: Option<SortMetric>, details: bool) -> Self {
-        Self { sort_metric, details }
+        Self {
+            sort_metric,
+            details,
+        }
     }
 
     /// REQ-5.1, REQ-5.2, REQ-5.3: Display summary tables (global, language, file, unsupported)
@@ -95,7 +98,13 @@ impl ConsoleOutput {
         // Unsupported Files
         table.add_row(Row::new(vec![
             Cell::new("Unsupported Files"),
-            Cell::new(&report.summary.unsupported_files.to_formatted_string(&Locale::en)).style_spec("r"),
+            Cell::new(
+                &report
+                    .summary
+                    .unsupported_files
+                    .to_formatted_string(&Locale::en),
+            )
+            .style_spec("r"),
             Cell::new("").style_spec("r"),
         ]));
         // Total Lines
@@ -107,25 +116,43 @@ impl ConsoleOutput {
         // Logical Lines
         let logical_pct = if total_lines > 0.0 {
             (report.summary.logical_lines as f64 / total_lines) * 100.0
-        } else { 0.0 };
+        } else {
+            0.0
+        };
         table.add_row(Row::new(vec![
             Cell::new("Logical Lines"),
-            Cell::new(&report.summary.logical_lines.to_formatted_string(&Locale::en)).style_spec("r"),
+            Cell::new(
+                &report
+                    .summary
+                    .logical_lines
+                    .to_formatted_string(&Locale::en),
+            )
+            .style_spec("r"),
             Cell::new(&format!("{:.2} %", logical_pct)).style_spec("r"),
         ]));
         // Comment Lines
         let comment_pct = if total_lines > 0.0 {
             (report.summary.comment_lines as f64 / total_lines) * 100.0
-        } else { 0.0 };
+        } else {
+            0.0
+        };
         table.add_row(Row::new(vec![
             Cell::new("Comment Lines"),
-            Cell::new(&report.summary.comment_lines.to_formatted_string(&Locale::en)).style_spec("r"),
+            Cell::new(
+                &report
+                    .summary
+                    .comment_lines
+                    .to_formatted_string(&Locale::en),
+            )
+            .style_spec("r"),
             Cell::new(&format!("{:.2} %", comment_pct)).style_spec("r"),
         ]));
         // Empty Lines
         let empty_pct = if total_lines > 0.0 {
             (report.summary.empty_lines as f64 / total_lines) * 100.0
-        } else { 0.0 };
+        } else {
+            0.0
+        };
         table.add_row(Row::new(vec![
             Cell::new("Empty Lines"),
             Cell::new(&report.summary.empty_lines.to_formatted_string(&Locale::en)).style_spec("r"),
@@ -134,7 +161,13 @@ impl ConsoleOutput {
         // Languages
         table.add_row(Row::new(vec![
             Cell::new("Languages"),
-            Cell::new(&report.summary.languages_count.to_formatted_string(&Locale::en)).style_spec("r"),
+            Cell::new(
+                &report
+                    .summary
+                    .languages_count
+                    .to_formatted_string(&Locale::en),
+            )
+            .style_spec("r"),
             Cell::new("").style_spec("r"),
         ]));
 
@@ -278,11 +311,8 @@ impl ReportExporter {
 
     /// REQ-6.3: Export as CSV
     fn export_csv(&self, report: &Report, path: &Path) -> Result<()> {
-        let mut wtr = csv::Writer::from_path(path).map_err(|e| {
-            SlocError::Io(std::io::Error::other(
-                e.to_string(),
-            ))
-        })?;
+        let mut wtr = csv::Writer::from_path(path)
+            .map_err(|e| SlocError::Io(std::io::Error::other(e.to_string())))?;
 
         // Write header
         wtr.write_record([
@@ -293,11 +323,7 @@ impl ReportExporter {
             "Comment Lines",
             "Empty Lines",
         ])
-        .map_err(|e| {
-            SlocError::Io(std::io::Error::other(
-                e.to_string(),
-            ))
-        })?;
+        .map_err(|e| SlocError::Io(std::io::Error::other(e.to_string())))?;
 
         // Write file data
         for file in &report.files {
@@ -309,26 +335,21 @@ impl ReportExporter {
                 file.comment_lines.to_string(),
                 file.empty_lines.to_string(),
             ])
-            .map_err(|e| {
-                SlocError::Io(std::io::Error::other(
-                    e.to_string(),
-                ))
-            })?;
+            .map_err(|e| SlocError::Io(std::io::Error::other(e.to_string())))?;
         }
 
         // REQ-3.5: Add unsupported files section
         if !report.unsupported_files.is_empty() {
-            wtr.write_record(&["--- Unsupported Files (not counted) ---"]).map_err(|e| SlocError::Io(std::io::Error::other(e.to_string())))?;
+            wtr.write_record(&["--- Unsupported Files (not counted) ---"])
+                .map_err(|e| SlocError::Io(std::io::Error::other(e.to_string())))?;
             for path in &report.unsupported_files {
-                wtr.write_record(&[path.to_string_lossy().to_string()]).map_err(|e| SlocError::Io(std::io::Error::other(e.to_string())))?;
+                wtr.write_record(&[path.to_string_lossy().to_string()])
+                    .map_err(|e| SlocError::Io(std::io::Error::other(e.to_string())))?;
             }
         }
 
-        wtr.flush().map_err(|e| {
-            SlocError::Io(std::io::Error::other(
-                e.to_string(),
-            ))
-        })?;
+        wtr.flush()
+            .map_err(|e| SlocError::Io(std::io::Error::other(e.to_string())))?;
         Ok(())
     }
 }
