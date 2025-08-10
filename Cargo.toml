@@ -1,6 +1,6 @@
 [package]
 name = "rustedbytes-counterlines"
-version = "0.1.0"
+version = "0.2.0"
 edition = "2021"
 authors = ["Daniele Olmisani <daniele.olmisani@gmail.com>"]
 description = "A high-performance, multi-language source code line counter CLI tool written in Rust"

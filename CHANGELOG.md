@@ -5,6 +5,34 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+## [0.2.0] - 2025-08-10
+
+### Added
+
+- **Comment Lines metric**: Added the "Comment Lines" metric alongside Total, Logical, and Empty Lines (REQ-1.1).
+- **Unsupported files handling**: Files with unsupported syntax are now excluded from all statistics (REQ-3.5.1, REQ-3.5.2) and are listed separately in output and reports (REQ-3.5.3).
+- **Percent column**: Added a percent (%) column in global and language summary tables, with % symbol and calculation relative to the total (REQ-5.1, REQ-5.2).
+- **Numeric alignment**: All numeric values in tables are now right-aligned and formatted with thousands separators (REQ-5.3).
+- **CLI flag --details**: Added the --details flag to show per-file statistics and unsupported file list only if requested (REQ-8.3).
+- **Human readable performance**: Performance (throughput) is now shown in human readable format using the external crate `human_format` (REQ-9.7).
+- **Requirements traceability**: Improved requirements traceability with REQ-xx references in code comments and documentation.
+
+### Changed
+
+- Updated documentation (README.md, REQUIREMENTS.md, METRICS_USAGE.md) to reflect new metrics, unsupported file handling, new CLI flag, and traceability.
+- Refactored output code to support alignment and advanced formatting.
+- Replaced custom number formatting function with the `human_format` crate.
+
+### Fixed
+
+- Fixed minor bugs in percent handling and exclusion of unsupported files from statistics.
+
+### Removed
+
+- Removed the unused `utils.rs` module.
+
 ## [0.1.0] - 2024-08-09
 
 ### Added

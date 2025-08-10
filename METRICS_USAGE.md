@@ -56,7 +56,7 @@ Operation: count
 Timestamp: 2024-01-15 14:30:25 UTC
 Args: paths=1, recursive=true, threads=8, format=Some(Json)
 
-Tool version: 0.1.0
+Tool version: 0.2.0
 [0.001s] system_cpu_count: 8.000
 [0.002s] system_available_parallelism: 8.000
 [0.005s] config_load_time: 0.003
