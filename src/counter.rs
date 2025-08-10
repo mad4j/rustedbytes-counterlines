@@ -6,6 +6,7 @@ use crate::config::{AppConfig, MetricsLogger};
 use crate::error::{Result, SlocError};
 use crate::language::{CommentParser, LanguageDetector, LineType};
 use crate::output::{ConsoleOutput, ReportExporter};
+use human_format::Formatter;
 use crate::report::{FileStats, Report};
 use colored::Colorize;
 use encoding_rs_io::DecodeReaderBytesBuilder;
@@ -225,6 +226,17 @@ pub fn execute_count(args: CountArgs) -> Result<()> {
         + report.languages.len() * std::mem::size_of::<crate::report::LanguageStats>();
     metrics_logger.log_metric("memory_usage_estimate_bytes", memory_estimate as f64);
 
+    // Output performance: lines/sec (always, regardless of params)
+    let elapsed_secs = total_time.as_secs_f64();
+    let total_lines = report.summary.total_lines as f64;
+    let lines_per_sec = if elapsed_secs > 0.0 { total_lines / elapsed_secs } else { 0.0 };
+    let thread_count = rayon::current_num_threads();
+    let perf_str = Formatter::new().with_decimals(2).format(lines_per_sec);
+    println!(
+        "Performance: {} lines/sec ({} threads)",
+        perf_str,
+        thread_count
+    );
     // Performance summary for large operations
     if total_time.as_secs() >= args.perf_summary_threshold || report.summary.total_files > 1000 {
         println!("\n{}", "Performance Summary:".bright_cyan());
