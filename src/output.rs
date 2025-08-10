@@ -72,18 +72,18 @@ impl ConsoleOutput {
         let mut table = Table::new();
         table.add_row(Row::new(vec![
             Cell::new("Metric").style_spec("b"),
-            Cell::new("Value").style_spec("b"),
+            Cell::new("Value").style_spec("br"),
         ]));
 
         // REQ-5.3: Format with thousands separators
         table.add_row(Row::new(vec![
             Cell::new("Total Files"),
-            Cell::new(&report.summary.total_files.to_formatted_string(&Locale::en)),
+            Cell::new(&report.summary.total_files.to_formatted_string(&Locale::en)).style_spec("r"),
         ]));
 
         table.add_row(Row::new(vec![
             Cell::new("Total Lines"),
-            Cell::new(&report.summary.total_lines.to_formatted_string(&Locale::en)),
+            Cell::new(&report.summary.total_lines.to_formatted_string(&Locale::en)).style_spec("r"),
         ]));
 
         table.add_row(Row::new(vec![
@@ -93,17 +93,17 @@ impl ConsoleOutput {
                     .summary
                     .logical_lines
                     .to_formatted_string(&Locale::en),
-            ),
+            ).style_spec("r"),
         ]));
 
         table.add_row(Row::new(vec![
             Cell::new("Comment Lines"),
-            Cell::new(&report.summary.comment_lines.to_formatted_string(&Locale::en)),
+            Cell::new(&report.summary.comment_lines.to_formatted_string(&Locale::en)).style_spec("r"),
         ]));
 
         table.add_row(Row::new(vec![
             Cell::new("Empty Lines"),
-            Cell::new(&report.summary.empty_lines.to_formatted_string(&Locale::en)),
+            Cell::new(&report.summary.empty_lines.to_formatted_string(&Locale::en)).style_spec("r"),
         ]));
 
         table.add_row(Row::new(vec![
@@ -113,7 +113,7 @@ impl ConsoleOutput {
                     .summary
                     .languages_count
                     .to_formatted_string(&Locale::en),
-            ),
+            ).style_spec("r"),
         ]));
 
         // REQ-5.3: Calculate and display percentages with 2 decimal places
@@ -145,12 +145,12 @@ impl ConsoleOutput {
         let mut table = Table::new();
         table.add_row(Row::new(vec![
             Cell::new("Language").style_spec("b"),
-            Cell::new("Files").style_spec("b"),
-            Cell::new("Total").style_spec("b"),
-            Cell::new("Logical").style_spec("b"),
-            Cell::new("Comment").style_spec("b"),
-            Cell::new("Empty").style_spec("b"),
-            Cell::new("Density %").style_spec("b"),
+            Cell::new("Files").style_spec("br"),
+            Cell::new("Total").style_spec("br"),
+            Cell::new("Logical").style_spec("br"),
+            Cell::new("Comment").style_spec("br"),
+            Cell::new("Empty").style_spec("br"),
+            Cell::new("Density %").style_spec("br"),
         ]));
 
         let mut languages = report.languages.clone();
@@ -176,12 +176,12 @@ impl ConsoleOutput {
 
             table.add_row(Row::new(vec![
                 Cell::new(&lang.language),
-                Cell::new(&lang.file_count.to_formatted_string(&Locale::en)),
-                Cell::new(&lang.total_lines.to_formatted_string(&Locale::en)),
-                Cell::new(&lang.logical_lines.to_formatted_string(&Locale::en)),
-                Cell::new(&lang.comment_lines.to_formatted_string(&Locale::en)),
-                Cell::new(&lang.empty_lines.to_formatted_string(&Locale::en)),
-                Cell::new(&format!("{:.2}", density)),
+                Cell::new(&lang.file_count.to_formatted_string(&Locale::en)).style_spec("r"),
+                Cell::new(&lang.total_lines.to_formatted_string(&Locale::en)).style_spec("r"),
+                Cell::new(&lang.logical_lines.to_formatted_string(&Locale::en)).style_spec("r"),
+                Cell::new(&lang.comment_lines.to_formatted_string(&Locale::en)).style_spec("r"),
+                Cell::new(&lang.empty_lines.to_formatted_string(&Locale::en)).style_spec("r"),
+                Cell::new(&format!("{:.2}", density)).style_spec("r"),
             ]));
         }
 
@@ -197,10 +197,10 @@ impl ConsoleOutput {
         table.add_row(Row::new(vec![
             Cell::new("File").style_spec("b"),
             Cell::new("Language").style_spec("b"),
-            Cell::new("Total").style_spec("b"),
-            Cell::new("Logical").style_spec("b"),
-            Cell::new("Comment").style_spec("b"),
-            Cell::new("Empty").style_spec("b"),
+            Cell::new("Total").style_spec("br"),
+            Cell::new("Logical").style_spec("br"),
+            Cell::new("Comment").style_spec("br"),
+            Cell::new("Empty").style_spec("br"),
         ]));
 
         let mut files = report.files.clone();
@@ -225,10 +225,10 @@ impl ConsoleOutput {
             table.add_row(Row::new(vec![
                 Cell::new(filename),
                 Cell::new(&file.language),
-                Cell::new(&file.total_lines.to_formatted_string(&Locale::en)),
-                Cell::new(&file.logical_lines.to_formatted_string(&Locale::en)),
-                Cell::new(&file.comment_lines.to_formatted_string(&Locale::en)),
-                Cell::new(&file.empty_lines.to_formatted_string(&Locale::en)),
+                Cell::new(&file.total_lines.to_formatted_string(&Locale::en)).style_spec("r"),
+                Cell::new(&file.logical_lines.to_formatted_string(&Locale::en)).style_spec("r"),
+                Cell::new(&file.comment_lines.to_formatted_string(&Locale::en)).style_spec("r"),
+                Cell::new(&file.empty_lines.to_formatted_string(&Locale::en)).style_spec("r"),
             ]));
         }
 
