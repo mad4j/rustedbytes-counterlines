@@ -1,5 +1,18 @@
 // counter.rs - Core line counting logic
-// Implements: REQ-1.1 (incl. comment lines), REQ-2.1, REQ-2.2, REQ-2.3, REQ-2.4, REQ-3.5, REQ-4.1, REQ-4.2, REQ-4.3, REQ-4.4, REQ-4.5, REQ-9.2, REQ-9.4, REQ-9.5, REQ-9.7
+// Implements:
+//   REQ-1.1: Logical, comment, empty lines counting
+//   REQ-2.1/2/3/4: File/dir input, wildcards, recursion, stdin
+//   REQ-3.3: Custom language config
+//   REQ-3.4: Language override
+//   REQ-3.5: Unsupported files exclusion
+//   REQ-4.1-4.5: Preprocessor, encoding, etc.
+//   REQ-5.1-5.3: Console output, sorting, formatting
+//   REQ-6.4: Report creation
+//   REQ-6.8: Report export
+//   REQ-9.2: Encoding detection
+//   REQ-9.4: Parallel processing
+//   REQ-9.5: Progress bar
+//   REQ-9.7: Metrics logging
 
 use crate::cli::CountArgs;
 use crate::config::{AppConfig, MetricsLogger};
@@ -23,7 +36,7 @@ use walkdir::WalkDir;
 pub fn execute_count(args: CountArgs) -> Result<()> {
     let start_time = Instant::now();
 
-    // REQ-9.7: Initialize metrics logger with CLI overrides
+    // REQ-9.7: Initialize metrics logger with CLI overrides (metrics)
     let app_config = AppConfig::with_cli_overrides(
         args.config.as_deref(),
         args.enable_metrics,
@@ -46,14 +59,14 @@ pub fn execute_count(args: CountArgs) -> Result<()> {
 
     let mut detector = LanguageDetector::new();
 
-    // REQ-3.3: Load custom language config
+    // REQ-3.3: Load custom language config (custom language definitions)
     if let Some(config_path) = &args.config {
         let load_start = Instant::now();
         detector.load_from_config(config_path)?;
         metrics_logger.log_metric("config_load_time", load_start.elapsed().as_secs_f64());
     }
 
-    // REQ-3.4: Apply language overrides
+    // REQ-3.4: Apply language overrides (per estensione)
     for (ext, lang) in &args.language_override {
         detector.add_override(ext.clone(), lang.clone());
     }
@@ -62,7 +75,7 @@ pub fn execute_count(args: CountArgs) -> Result<()> {
         args.language_override.len() as f64,
     );
 
-    // Collect all file paths
+    // REQ-2.1/2.2/2.3/2.4: Collect all file paths (input sources)
     let path_collection_start = Instant::now();
     let paths = collect_paths(&args)?;
     metrics_logger.log_metric(
@@ -71,7 +84,7 @@ pub fn execute_count(args: CountArgs) -> Result<()> {
     );
     metrics_logger.log_metric("total_files_to_process", paths.len() as f64);
 
-    // REQ-9.4: Set up parallel processing
+    // REQ-9.4: Set up parallel processing (thread pool)
     let thread_count = if args.threads > 0 {
         rayon::ThreadPoolBuilder::new()
             .num_threads(args.threads)
@@ -83,7 +96,7 @@ pub fn execute_count(args: CountArgs) -> Result<()> {
     };
     metrics_logger.log_metric("thread_count", thread_count as f64);
 
-    // REQ-9.5: Progress indicator
+    // REQ-9.5: Progress indicator (barra avanzamento)
     let progress = if !args.no_progress {
         let pb = ProgressBar::new(paths.len() as u64);
         pb.set_style(
@@ -97,7 +110,7 @@ pub fn execute_count(args: CountArgs) -> Result<()> {
         None
     };
 
-    // Count lines in parallel (REQ-9.4)
+    // REQ-1.1, REQ-9.4: Count lines in parallel (core counting)
     let detector = Arc::new(detector);
     let ignore_preprocessor = args.ignore_preprocessor;
     let metrics_clone = Arc::clone(&metrics_logger);
@@ -181,7 +194,7 @@ pub fn execute_count(args: CountArgs) -> Result<()> {
         metrics_logger.log_metric("files_per_second", files_per_sec);
     }
 
-    // Create report (REQ-6.4, REQ-6.5, REQ-6.6)
+    // REQ-6.4, REQ-6.5, REQ-6.6: Create report (aggregazione risultati)
     let report_creation_start = Instant::now();
     let mut report = Report::new(results, unsupported_files);
     metrics_logger.log_metric(
@@ -189,7 +202,7 @@ pub fn execute_count(args: CountArgs) -> Result<()> {
         report_creation_start.elapsed().as_secs_f64(),
     );
 
-    // REQ-6.9: Add checksum if requested
+    // REQ-6.9: Add checksum if requested (opzionale)
     if args.checksum {
         let checksum_start = Instant::now();
         report.calculate_checksum();
@@ -199,13 +212,13 @@ pub fn execute_count(args: CountArgs) -> Result<()> {
         );
     }
 
-    // REQ-5.1, REQ-5.2, REQ-5.3: Console output
+    // REQ-5.1, REQ-5.2, REQ-5.3: Console output (tabella, dettagli, unsupported)
     let console_start = Instant::now();
     let console = ConsoleOutput::new(args.sort, args.details);
     console.display_summary(&report)?;
     metrics_logger.log_metric("console_output_time", console_start.elapsed().as_secs_f64());
 
-    // REQ-6.8: Export report if requested
+    // REQ-6.8: Export report if requested (json/xml/csv)
     if let Some(output_path) = args.output {
         if let Some(format) = args.format {
             let export_start = Instant::now();
@@ -216,17 +229,17 @@ pub fn execute_count(args: CountArgs) -> Result<()> {
         }
     }
 
-    // REQ-9.7: Log final completion metrics
+    // REQ-9.7: Log final completion metrics (fine operazione)
     let total_time = start_time.elapsed();
     metrics_logger.log_completion(report.summary.total_files, report.summary.total_lines);
     metrics_logger.log_metric("total_operation_time", total_time.as_secs_f64());
 
-    // Log memory usage if possible (approximate)
+    // REQ-9.7: Log memory usage if possible (approximate)
     let memory_estimate = report.files.len() * std::mem::size_of::<FileStats>()
         + report.languages.len() * std::mem::size_of::<crate::report::LanguageStats>();
     metrics_logger.log_metric("memory_usage_estimate_bytes", memory_estimate as f64);
 
-    // Output performance: lines/sec (always, regardless of params)
+    // REQ-9.7: Output performance: lines/sec (always, regardless of params, human readable)
     let elapsed_secs = total_time.as_secs_f64();
     let total_lines = report.summary.total_lines as f64;
     let lines_per_sec = if elapsed_secs > 0.0 { total_lines / elapsed_secs } else { 0.0 };

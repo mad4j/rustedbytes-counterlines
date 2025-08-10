@@ -1,5 +1,9 @@
 // cli.rs - Command-line interface definitions
-// Implements: REQ-8.1, REQ-8.2, REQ-8.3, REQ-8.4, REQ-9.7
+// Implements:
+//   REQ-8.1: CLI interface
+//   REQ-8.2: Help/version
+//   REQ-8.3: Subcommands (count, report, process, compare)
+//   REQ-9.7: Metrics CLI options
 
 use clap::{Parser, Subcommand, ValueEnum};
 use std::path::PathBuf;

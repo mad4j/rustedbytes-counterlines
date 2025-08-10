@@ -1,5 +1,13 @@
 // output.rs - Console and file output formatting
-// Implements: REQ-5.1, REQ-5.2, REQ-5.3, REQ-5.4, REQ-6.1, REQ-6.2, REQ-6.3, REQ-6.7, REQ-6.8, REQ-1.1 (comment lines)
+// Implements:
+//   REQ-1.1: Comment lines in output
+//   REQ-5.1: Global summary table
+//   REQ-5.2: Language summary table
+//   REQ-5.3: Number formatting, alignment
+//   REQ-5.4: Sorting
+//   REQ-6.1/2/3: Export JSON/XML/CSV
+//   REQ-6.7: Output options
+//   REQ-6.8: Output path
 
 use crate::cli::{OutputFormat, SortMetric};
 use crate::error::{Result, SlocError};
@@ -21,7 +29,7 @@ impl ConsoleOutput {
         Self { sort_metric, details }
     }
 
-    /// REQ-5.1, REQ-5.2, REQ-5.3: Display summary tables
+    /// REQ-5.1, REQ-5.2, REQ-5.3: Display summary tables (global, language, file, unsupported)
     pub fn display_summary(&self, report: &Report) -> Result<()> {
         println!("\n{}", "═".repeat(80).blue());
         println!("{}", "Source Lines of Code (SLOC) Report".bold().cyan());

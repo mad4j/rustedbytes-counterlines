@@ -1,5 +1,16 @@
 // report.rs - Report structure and generation
-// Implements: REQ-6.1, REQ-6.2, REQ-6.3, REQ-6.4, REQ-6.5, REQ-6.6, REQ-6.7, REQ-6.9, REQ-9.7
+// Implements:
+//   REQ-1.1: Comment lines in stats
+//   REQ-3.5: Unsupported files
+//   REQ-6.1: JSON export
+//   REQ-6.2: XML export
+//   REQ-6.3: CSV export
+//   REQ-6.4: File/language/global summary
+//   REQ-6.5: Timestamp
+//   REQ-6.6: Format version
+//   REQ-6.7: Output options
+//   REQ-6.9: Checksum
+//   REQ-9.7: Metrics logging
 
 use crate::cli::ReportArgs;
 use crate::config::{AppConfig, MetricsLogger};

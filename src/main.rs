@@ -1,5 +1,9 @@
 // main.rs - Entry point for SLOC counter CLI tool
-// Implements: REQ-8.1, REQ-8.2, REQ-8.3, REQ-8.4
+// Implements:
+//   REQ-8.1: CLI interface
+//   REQ-8.2: Help/version
+//   REQ-8.3: Subcommands (count, report, process, compare)
+//   REQ-8.4: Error handling
 
 mod cli;
 mod config;
