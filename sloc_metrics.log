@@ -1,0 +1,111 @@
+
+=== SLOC Metrics Session Started ===
+Operation: count
+Timestamp: 2025-08-10 05:38:30 UTC
+Args: paths=1, recursive=true, threads=0, format=None
+[0.001s] system_cpu_count: 12.000
+[0.002s] system_available_parallelism: 12.000
+Tool version: 0.1.0
+[0.004s] operation_start: 0.004
+[0.005s] language_overrides_count: 0.000
+[0.008s] path_collection_time: 0.002
+[0.009s] total_files_to_process: 25.000
+[0.011s] thread_count: 12.000
+[0.014s] file_process_time_test-concurred.log.bak: 0.001
+[0.014s] file_process_time_commands.txt: 0.001
+[0.015s] file_process_time_leo_log_light_tests.c: 0.003
+[0.015s] file_process_time_leo_log_light_simple_backend.h: 0.003
+[0.015s] file_process_time_lll_portability.c: 0.003
+[0.016s] file_process_time_leo_log_light_tests_concur.c: 0.004
+[0.016s] file_process_time_leo_log_light_simple_backend.c: 0.004
+[0.016s] file_process_time_lll_buffered_backend.h: 0.004
+[0.018s] file_process_time_leo_log_light.h: 0.006
+[0.019s] file_process_time_lll: 0.005
+[0.019s] file_process_time_leo_log_light.c: 0.007
+[0.019s] file_process_time_test-concur.log: 0.007
+[0.019s] file_process_time_leo_log_light_portability.h: 0.002
+[0.019s] file_process_time_gmon.out: 0.003
+[0.026s] file_process_time_out.txt: 0.004
+[0.029s] file_process_time_test-log_10000.log: 0.013
+[0.033s] large_file_throughput: 468316.064
+[0.035s] large_file_throughput: 760158.369
+[0.037s] file_process_time_utest.h: 0.009
+[0.040s] file_process_time_test-susp_resum.log: 0.019
+[0.039s] file_process_time_lll_buffered_backend.c: 0.005
+[0.040s] file_process_time_test-concur.log.bak: 0.006
+[0.045s] large_file_throughput: 1054737.752
+[0.045s] large_file_throughput: 199639.765
+[0.046s] large_file_throughput: 568263.395
+[0.048s] file_process_time_test-log_10000.log.bak: 0.021
+[0.050s] large_file_throughput: 477260.582
+[0.053s] file_process_time_test-susp_resum.log.bak: 0.024
+[0.054s] large_file_throughput: 838064.001
+[0.056s] total_processing_time: 0.044
+[0.058s] files_processed_successfully: 25.000
+[0.060s] total_lines_processed: 70538.000
+[0.061s] logical_lines_processed: 69444.000
+[0.062s] empty_lines_processed: 636.000
+[0.064s] overall_throughput_lines_per_sec: 1586214.341
+[0.066s] files_per_second: 562.184
+[0.067s] report_creation_time: 0.000
+[0.084s] console_output_time: 0.016
+[0.085s] total_files: 25.000
+[0.086s] total_lines: 70538.000
+[0.088s] elapsed_seconds: 0.085
+[0.089s] lines_per_second: 0.000
+=== Session Completed ===
+
+[0.092s] total_operation_time: 0.085
+[0.093s] memory_usage_estimate_bytes: 2112.000
+
+=== SLOC Metrics Session Started ===
+Operation: count
+Timestamp: 2025-08-10 07:00:19 UTC
+Args: paths=1, recursive=true, threads=0, format=None
+[0.001s] system_cpu_count: 12.000
+[0.001s] system_available_parallelism: 12.000
+Tool version: 0.1.0
+[0.002s] operation_start: 0.002
+[0.002s] language_overrides_count: 0.000
+[0.005s] path_collection_time: 0.002
+[0.005s] total_files_to_process: 25.000
+[0.007s] thread_count: 12.000
+[0.009s] file_process_time_test-concurred.log.bak: 0.001
+[0.009s] file_process_time_lll_buffered_backend.h: 0.002
+[0.009s] file_process_time_leo_log_light.c: 0.002
+[0.009s] file_process_time_leo_log_light_simple_backend.c: 0.002
+[0.010s] file_process_time_test-concur.log: 0.002
+[0.010s] file_process_time_test-concur.log.bak: 0.003
+[0.010s] large_file_throughput: 1645858.105
+[0.010s] file_process_time_lll_portability.c: 0.003
+[0.011s] large_file_throughput: 1266223.143
+[0.014s] file_process_time_lll: 0.001
+[0.017s] file_process_time_utest.h: 0.002
+[0.018s] file_process_time_lll_buffered_backend.c: 0.001
+[0.018s] large_file_throughput: 769127.457
+[0.019s] file_process_time_test-log_10000.log: 0.006
+[0.020s] large_file_throughput: 1735848.402
+[0.024s] file_process_time_test-log_10000.log.bak: 0.006
+[0.025s] large_file_throughput: 1587500.595
+[0.027s] file_process_time_test-susp_resum.log: 0.013
+[0.027s] large_file_throughput: 1531471.529
+[0.029s] file_process_time_test-susp_resum.log.bak: 0.012
+[0.030s] large_file_throughput: 1685113.003
+[0.031s] total_processing_time: 0.023
+[0.032s] files_processed_successfully: 25.000
+[0.033s] total_lines_processed: 70538.000
+[0.033s] logical_lines_processed: 69444.000
+[0.034s] comment_lines_processed: 250.000
+[0.035s] empty_lines_processed: 636.000
+[0.035s] overall_throughput_lines_per_sec: 3055524.271
+[0.035s] files_per_second: 1082.936
+[0.036s] report_creation_time: 0.000
+[0.052s] console_output_time: 0.016
+[0.053s] total_files: 25.000
+[0.053s] total_lines: 70538.000
+[0.054s] elapsed_seconds: 0.053
+[0.054s] lines_per_second: 0.000
+=== Session Completed ===
+
+[0.055s] total_operation_time: 0.053
+[0.055s] memory_usage_estimate_bytes: 2328.000

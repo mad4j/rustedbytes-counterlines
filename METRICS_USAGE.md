@@ -61,6 +61,7 @@ Tool version: 0.1.0
 [0.234s] files_processed_successfully: 245.000
 [0.235s] total_lines_processed: 45678.000
 [0.236s] logical_lines_processed: 32145.000
+[0.236s] comment_lines_processed: 4600.000
 [0.237s] empty_lines_processed: 8945.000
 [0.238s] overall_throughput_lines_per_sec: 195234.567
 [0.239s] files_per_second: 1047.863
@@ -101,6 +102,7 @@ Tool version: 0.1.0
 - `overall_throughput_lines_per_sec`: Lines processed per second
 - `files_per_second`: Files processed per second
 - `large_file_throughput`: Throughput for files > 1000 lines
+- `comment_lines_processed`: Total comment lines processed
 
 ### Per-File Metrics (for files taking > 1ms)
 
@@ -182,17 +184,18 @@ cargo run -- compare old_report.json new_report.json --enable-metrics
 cargo run -- report src/ --output project_report.json --enable-metrics
 ```
 
-## Performance Summary
+### Performance Summary
 
 For operations taking longer than the threshold (default 5 seconds) or processing more than 1000 files, the tool displays a performance summary:
 
 ```text
 Performance Summary:
-  Total time: 2.45s
-  Files processed: 1,234
-  Lines processed: 456,789
-  Throughput: 186,444 lines/sec
-  Metrics logged to: sloc_metrics.log
+    Total time: 2.45s
+    Files processed: 1,234
+    Lines processed: 456,789
+    Comment lines: 45,000
+    Throughput: 186,444 lines/sec
+    Metrics logged to: sloc_metrics.log
 ```
 
 ## Analyzing Metrics
@@ -202,7 +205,8 @@ Performance Summary:
 1. **Slow File Processing**: Look for high `file_process_time_*` values
 2. **Thread Efficiency**: Compare `thread_count` vs actual performance
 3. **I/O Bottlenecks**: Check `path_collection_time` vs `total_processing_time`
-4. **Memory Issues**: Monitor `memory_usage_estimate_bytes` for large projects
+4. **Comment Line Ratio**: Compare `comment_lines_processed` to total lines for documentation density
+5. **Memory Issues**: Monitor `memory_usage_estimate_bytes` for large projects
 
 ### Performance Tuning
 

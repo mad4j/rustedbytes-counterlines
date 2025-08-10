@@ -1,5 +1,5 @@
 // counter.rs - Core line counting logic
-// Implements: REQ-1.1, REQ-2.1, REQ-2.2, REQ-2.3, REQ-2.4, REQ-4.1, REQ-4.2, REQ-4.3, REQ-4.4, REQ-4.5, REQ-9.2, REQ-9.4, REQ-9.5, REQ-9.7
+// Implements: REQ-1.1 (incl. comment lines), REQ-2.1, REQ-2.2, REQ-2.3, REQ-2.4, REQ-4.1, REQ-4.2, REQ-4.3, REQ-4.4, REQ-4.5, REQ-9.2, REQ-9.4, REQ-9.5, REQ-9.7
 
 use crate::cli::CountArgs;
 use crate::config::{AppConfig, MetricsLogger};
@@ -158,11 +158,13 @@ pub fn execute_count(args: CountArgs) -> Result<()> {
     // Log processing statistics
     let total_lines: usize = results.iter().map(|r| r.total_lines).sum();
     let logical_lines: usize = results.iter().map(|r| r.logical_lines).sum();
+    let comment_lines: usize = results.iter().map(|r| r.comment_lines).sum();
     let empty_lines: usize = results.iter().map(|r| r.empty_lines).sum();
 
     metrics_logger.log_metric("files_processed_successfully", results.len() as f64);
     metrics_logger.log_metric("total_lines_processed", total_lines as f64);
     metrics_logger.log_metric("logical_lines_processed", logical_lines as f64);
+    metrics_logger.log_metric("comment_lines_processed", comment_lines as f64);
     metrics_logger.log_metric("empty_lines_processed", empty_lines as f64);
 
     if processing_time.as_secs_f64() > 0.0 {
@@ -340,6 +342,7 @@ fn count_file(
 
     let mut total_lines = 0;
     let mut logical_lines = 0;
+    let mut comment_lines = 0;
     let mut empty_lines = 0;
 
     if let Some(lang) = language {
@@ -362,7 +365,7 @@ fn count_file(
                 // REQ-4.4: Parse line type
                 match parser.parse_line(&line) {
                     LineType::Empty => empty_lines += 1,
-                    LineType::Comment => {} // Comment but not empty
+                    LineType::Comment => comment_lines += 1,
                     LineType::Logical | LineType::Mixed => logical_lines += 1,
                 }
             }
@@ -386,6 +389,7 @@ fn count_file(
         language: language_name,
         total_lines,
         logical_lines,
+        comment_lines,
         empty_lines,
     })
 }

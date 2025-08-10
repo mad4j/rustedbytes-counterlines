@@ -10,8 +10,9 @@ The terms **SHALL**, **SHOULD**, and **MAY** are to be interpreted per [RFC 2119
 
 - **REQ-1.1** — The tool **SHALL** count and report the following metrics:  
   - **Total Lines**: all lines in a file, including comments, code, and blank lines.  
-  - **Logical Lines**: lines containing actual code statements, excluding comments and blank lines.  
-  - **Empty Lines**: lines containing only whitespace, or comments containing only whitespace.
+  - **Logical Lines**: lines containing actual code statements, excluding comments, comment-only lines, and blank lines.  
+  - **Comment Lines**: lines containing only comments (excluding code and blank lines).  
+  - **Empty Lines**: lines containing only whitespace.
 
 - **REQ-1.2** — The tool **SHALL** support multiple programming languages.
 

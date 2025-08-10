@@ -1,5 +1,5 @@
 // output.rs - Console and file output formatting
-// Implements: REQ-5.1, REQ-5.2, REQ-5.3, REQ-5.4, REQ-6.1, REQ-6.2, REQ-6.3, REQ-6.7, REQ-6.8
+// Implements: REQ-5.1, REQ-5.2, REQ-5.3, REQ-5.4, REQ-6.1, REQ-6.2, REQ-6.3, REQ-6.7, REQ-6.8, REQ-1.1 (comment lines)
 
 use crate::cli::{OutputFormat, SortMetric};
 use crate::error::{Result, SlocError};
@@ -87,6 +87,11 @@ impl ConsoleOutput {
         ]));
 
         table.add_row(Row::new(vec![
+            Cell::new("Comment Lines"),
+            Cell::new(&report.summary.comment_lines.to_formatted_string(&Locale::en)),
+        ]));
+
+        table.add_row(Row::new(vec![
             Cell::new("Empty Lines"),
             Cell::new(&report.summary.empty_lines.to_formatted_string(&Locale::en)),
         ]));
@@ -133,6 +138,7 @@ impl ConsoleOutput {
             Cell::new("Files").style_spec("b"),
             Cell::new("Total").style_spec("b"),
             Cell::new("Logical").style_spec("b"),
+            Cell::new("Comment").style_spec("b"),
             Cell::new("Empty").style_spec("b"),
             Cell::new("Density %").style_spec("b"),
         ]));
@@ -163,6 +169,7 @@ impl ConsoleOutput {
                 Cell::new(&lang.file_count.to_formatted_string(&Locale::en)),
                 Cell::new(&lang.total_lines.to_formatted_string(&Locale::en)),
                 Cell::new(&lang.logical_lines.to_formatted_string(&Locale::en)),
+                Cell::new(&lang.comment_lines.to_formatted_string(&Locale::en)),
                 Cell::new(&lang.empty_lines.to_formatted_string(&Locale::en)),
                 Cell::new(&format!("{:.2}", density)),
             ]));
@@ -182,6 +189,7 @@ impl ConsoleOutput {
             Cell::new("Language").style_spec("b"),
             Cell::new("Total").style_spec("b"),
             Cell::new("Logical").style_spec("b"),
+            Cell::new("Comment").style_spec("b"),
             Cell::new("Empty").style_spec("b"),
         ]));
 
@@ -209,6 +217,7 @@ impl ConsoleOutput {
                 Cell::new(&file.language),
                 Cell::new(&file.total_lines.to_formatted_string(&Locale::en)),
                 Cell::new(&file.logical_lines.to_formatted_string(&Locale::en)),
+                Cell::new(&file.comment_lines.to_formatted_string(&Locale::en)),
                 Cell::new(&file.empty_lines.to_formatted_string(&Locale::en)),
             ]));
         }
@@ -267,6 +276,7 @@ impl ReportExporter {
             "Language",
             "Total Lines",
             "Logical Lines",
+            "Comment Lines",
             "Empty Lines",
         ])
         .map_err(|e| {
@@ -282,6 +292,7 @@ impl ReportExporter {
                 file.language.clone(),
                 file.total_lines.to_string(),
                 file.logical_lines.to_string(),
+                file.comment_lines.to_string(),
                 file.empty_lines.to_string(),
             ])
             .map_err(|e| {

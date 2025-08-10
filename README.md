@@ -135,11 +135,12 @@ Built-in support for (REQ-3.1):
 
 ## Line Counting Rules
 
-The tool counts three types of lines (REQ-1.1):
+The tool counts four types of lines (REQ-1.1):
 
 1. **Total Lines**: All lines in a file
-2. **Logical Lines**: Lines containing actual code (excluding comments and blanks)
-3. **Empty Lines**: Lines with only whitespace or empty comments
+2. **Logical Lines**: Lines containing actual code (excluding comments, comment-only lines, and blanks)
+3. **Comment Lines**: Lines containing only comments (excluding code and blank lines)
+4. **Empty Lines**: Lines with only whitespace
 
 ### Special Features
 
@@ -151,7 +152,7 @@ The tool counts three types of lines (REQ-1.1):
 
 Reports include (REQ-6.4, REQ-6.5, REQ-6.6):
 
-- Per-file statistics (path, language, lines counts)
+- Per-file statistics (path, language, line counts: total, logical, comment, empty)
 - Language summaries
 - Global statistics
 - Generation timestamp (RFC 3339/ISO 8601)
@@ -170,7 +171,8 @@ Reports include (REQ-6.4, REQ-6.5, REQ-6.6):
       "language": "Rust",
       "totalLines": 150,
       "logicalLines": 120,
-      "emptyLines": 30
+      "commentLines": 20,
+      "emptyLines": 10
     }
   ],
   "languages": [
@@ -179,14 +181,16 @@ Reports include (REQ-6.4, REQ-6.5, REQ-6.6):
       "fileCount": 10,
       "totalLines": 1500,
       "logicalLines": 1200,
-      "emptyLines": 300
+      "commentLines": 200,
+      "emptyLines": 100
     }
   ],
   "summary": {
     "totalFiles": 10,
     "totalLines": 1500,
     "logicalLines": 1200,
-    "emptyLines": 300,
+    "commentLines": 200,
+    "emptyLines": 100,
     "languagesCount": 1
   },
   "checksum": "sha256_hash_here"
@@ -284,10 +288,10 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 
 This implementation fully complies with all requirements specified in REQUIREMENTS.md:
 
-- ✅ Purpose (REQ-1.x): Complete line counting functionality
+- ✅ Purpose (REQ-1.x): Complete line counting functionality, including comment lines
 - ✅ Input Handling (REQ-2.x): Flexible input methods
 - ✅ Language Support (REQ-3.x): Extensible multi-language support
-- ✅ Counting Rules (REQ-4.x): Accurate line classification
+- ✅ Counting Rules (REQ-4.x): Accurate line and comment classification
 - ✅ Console Output (REQ-5.x): Formatted, sortable output
 - ✅ Report Generation (REQ-6.x): Multiple export formats
 - ✅ Report Processing (REQ-7.x): Compare and analyze reports

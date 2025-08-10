@@ -18,27 +18,31 @@ const REPORT_FORMAT_VERSION: &str = "1.0";
 
 /// REQ-6.4: File statistics
 #[derive(Debug, Clone, Serialize, Deserialize)]
+/// REQ-1.1: File statistics including comment lines
 pub struct FileStats {
     pub path: PathBuf,
     pub language: String,
     pub total_lines: usize,
     pub logical_lines: usize,
+    pub comment_lines: usize,
     pub empty_lines: usize,
 }
 
-/// REQ-6.4: Language summary statistics
+/// REQ-6.4: Language summary statistics (includes comment lines per REQ-1.1)
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct LanguageStats {
     pub language: String,
     pub file_count: usize,
     pub total_lines: usize,
     pub logical_lines: usize,
+    pub comment_lines: usize,
     pub empty_lines: usize,
 }
 
 /// REQ-6.4, REQ-6.5, REQ-6.6, REQ-6.7: Report structure
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
+/// REQ-6.4, REQ-6.5, REQ-6.6, REQ-6.7: Report structure (includes comment lines per REQ-1.1)
 pub struct Report {
     /// REQ-6.6: Report format version
     pub report_format_version: String,
@@ -61,10 +65,12 @@ pub struct Report {
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
+/// REQ-6.4: Global summary statistics (includes comment lines per REQ-1.1)
 pub struct GlobalSummary {
     pub total_files: usize,
     pub total_lines: usize,
     pub logical_lines: usize,
+    pub comment_lines: usize,
     pub empty_lines: usize,
     pub languages_count: usize,
 }
@@ -97,12 +103,14 @@ impl Report {
                     file_count: 0,
                     total_lines: 0,
                     logical_lines: 0,
+                    comment_lines: 0,
                     empty_lines: 0,
                 });
 
             entry.file_count += 1;
             entry.total_lines += file.total_lines;
             entry.logical_lines += file.logical_lines;
+            entry.comment_lines += file.comment_lines;
             entry.empty_lines += file.empty_lines;
         }
 
@@ -118,6 +126,7 @@ impl Report {
             total_files: files.len(),
             total_lines: files.iter().map(|f| f.total_lines).sum(),
             logical_lines: files.iter().map(|f| f.logical_lines).sum(),
+            comment_lines: files.iter().map(|f| f.comment_lines).sum(),
             empty_lines: files.iter().map(|f| f.empty_lines).sum(),
             languages_count: languages.len(),
         }
@@ -136,6 +145,7 @@ impl Report {
             hasher.update(file.language.as_bytes());
             hasher.update(file.total_lines.to_string().as_bytes());
             hasher.update(file.logical_lines.to_string().as_bytes());
+            hasher.update(file.comment_lines.to_string().as_bytes());
             hasher.update(file.empty_lines.to_string().as_bytes());
         }
 
