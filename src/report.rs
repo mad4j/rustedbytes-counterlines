@@ -78,13 +78,15 @@ pub struct GlobalSummary {
     pub comment_lines: usize,
     pub empty_lines: usize,
     pub languages_count: usize,
+    pub unsupported_files: usize,
 }
 
 impl Report {
     /// Create a new report from file statistics
     pub fn new(files: Vec<FileStats>, unsupported_files: Vec<std::path::PathBuf>) -> Self {
         let languages = Self::calculate_language_stats(&files);
-        let summary = Self::calculate_summary(&files, &languages);
+        let mut summary = Self::calculate_summary(&files, &languages);
+        summary.unsupported_files = unsupported_files.len();
 
         Report {
             report_format_version: REPORT_FORMAT_VERSION.to_string(),
@@ -135,6 +137,7 @@ impl Report {
             comment_lines: files.iter().map(|f| f.comment_lines).sum(),
             empty_lines: files.iter().map(|f| f.empty_lines).sum(),
             languages_count: languages.len(),
+            unsupported_files: 0, // sarà valorizzato in Report::new
         }
     }
 

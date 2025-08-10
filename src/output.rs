@@ -76,9 +76,14 @@ impl ConsoleOutput {
         ]));
 
         // REQ-5.3: Format with thousands separators
+
         table.add_row(Row::new(vec![
             Cell::new("Total Files"),
             Cell::new(&report.summary.total_files.to_formatted_string(&Locale::en)).style_spec("r"),
+        ]));
+        table.add_row(Row::new(vec![
+            Cell::new("Unsupported Files"),
+            Cell::new(&report.summary.unsupported_files.to_formatted_string(&Locale::en)).style_spec("r"),
         ]));
 
         table.add_row(Row::new(vec![
