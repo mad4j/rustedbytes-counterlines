@@ -175,7 +175,6 @@ fn detect_format(path: &Path) -> OutputFormat {
 
 /// REQ-7.2: Comparison result structure
 #[derive(Debug, Serialize, Deserialize)]
-#[serde(rename = "comparison")]
 pub struct ComparisonResult {
     pub report1_generated: chrono::DateTime<chrono::Utc>,
     pub report2_generated: chrono::DateTime<chrono::Utc>,
@@ -187,7 +186,6 @@ pub struct ComparisonResult {
 }
 
 #[derive(Debug, Serialize, Deserialize)]
-#[serde(rename = "globalDelta")]
 pub struct GlobalDelta {
     pub files_delta: i64,
     pub total_lines_delta: i64,
@@ -197,7 +195,6 @@ pub struct GlobalDelta {
 }
 
 #[derive(Debug, Serialize, Deserialize)]
-#[serde(rename = "languageDelta")]
 pub struct LanguageDelta {
     pub language: String,
     pub files_delta: i64,
@@ -207,7 +204,6 @@ pub struct LanguageDelta {
 }
 
 #[derive(Debug, Serialize, Deserialize)]
-#[serde(rename = "fileDelta")]
 pub struct FileDelta {
     pub path: String,
     pub total_lines_delta: i64,
@@ -494,8 +490,9 @@ fn export_comparison(
             std::fs::write(path, json)?;
         }
         OutputFormat::Xml => {
-            let xml_content = format_comparison_xml(comparison);
-            std::fs::write(path, xml_content)?;
+            let xml = serde_xml_rs::to_string(comparison)
+                .map_err(|e| SlocError::Serialization(e.to_string()))?;
+            std::fs::write(path, xml)?;
         }
         OutputFormat::Csv => {
             // CSV export for comparison - simplified format
@@ -541,112 +538,4 @@ fn export_comparison(
     }
 
     Ok(())
-}
-
-/// Generate XML for comparison results
-fn format_comparison_xml(comparison: &ComparisonResult) -> String {
-    format!(
-        r#"<?xml version="1.0" encoding="UTF-8"?>
-<comparison>
-  <report1Generated>{}</report1Generated>
-  <report2Generated>{}</report2Generated>
-  <globalDelta>
-    <filesDelta>{}</filesDelta>
-    <totalLinesDelta>{}</totalLinesDelta>
-    <logicalLinesDelta>{}</logicalLinesDelta>
-    <emptyLinesDelta>{}</emptyLinesDelta>
-    <languagesDelta>{}</languagesDelta>
-  </globalDelta>
-  <languageDeltas>
-{}</languageDeltas>
-  <newFiles>
-{}</newFiles>
-  <removedFiles>
-{}</removedFiles>
-  <modifiedFiles>
-{}</modifiedFiles>
-</comparison>"#,
-        comparison.report1_generated.to_rfc3339(),
-        comparison.report2_generated.to_rfc3339(),
-        comparison.global_delta.files_delta,
-        comparison.global_delta.total_lines_delta,
-        comparison.global_delta.logical_lines_delta,
-        comparison.global_delta.empty_lines_delta,
-        comparison.global_delta.languages_delta,
-        format_language_deltas_xml(&comparison.language_deltas),
-        format_file_list_xml(&comparison.new_files, "newFile"),
-        format_file_list_xml(&comparison.removed_files, "removedFile"),
-        format_file_deltas_xml(&comparison.modified_files)
-    )
-}
-
-/// Format language deltas for XML
-fn format_language_deltas_xml(deltas: &[LanguageDelta]) -> String {
-    deltas
-        .iter()
-        .map(|delta| {
-            format!(
-                r#"    <languageDelta>
-      <language>{}</language>
-      <filesDelta>{}</filesDelta>
-      <totalLinesDelta>{}</totalLinesDelta>
-      <logicalLinesDelta>{}</logicalLinesDelta>
-      <emptyLinesDelta>{}</emptyLinesDelta>
-    </languageDelta>"#,
-                escape_xml(&delta.language),
-                delta.files_delta,
-                delta.total_lines_delta,
-                delta.logical_lines_delta,
-                delta.empty_lines_delta
-            )
-        })
-        .collect::<Vec<_>>()
-        .join("\n")
-}
-
-/// Format file list for XML
-fn format_file_list_xml(files: &[String], element_name: &str) -> String {
-    files
-        .iter()
-        .map(|file| {
-            format!(
-                r#"    <{}>{}</{}>"#,
-                element_name,
-                escape_xml(file),
-                element_name
-            )
-        })
-        .collect::<Vec<_>>()
-        .join("\n")
-}
-
-/// Format file deltas for XML
-fn format_file_deltas_xml(deltas: &[FileDelta]) -> String {
-    deltas
-        .iter()
-        .map(|delta| {
-            format!(
-                r#"    <modifiedFile>
-      <path>{}</path>
-      <totalLinesDelta>{}</totalLinesDelta>
-      <logicalLinesDelta>{}</logicalLinesDelta>
-      <emptyLinesDelta>{}</emptyLinesDelta>
-    </modifiedFile>"#,
-                escape_xml(&delta.path),
-                delta.total_lines_delta,
-                delta.logical_lines_delta,
-                delta.empty_lines_delta
-            )
-        })
-        .collect::<Vec<_>>()
-        .join("\n")
-}
-
-/// Escape XML special characters for processor module
-fn escape_xml(text: &str) -> String {
-    text.replace('&', "&amp;")
-        .replace('<', "&lt;")
-        .replace('>', "&gt;")
-        .replace('"', "&quot;")
-        .replace('\'', "&apos;")
 }
