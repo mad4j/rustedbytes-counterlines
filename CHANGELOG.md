@@ -22,6 +22,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Removed documentation badge from `README.md`.
 - Fix XML serialization by upgrading serde-xml-rs to v0.8.1 (PR #8)
+- Fix Performance optimization: Add optimized Cargo profiles and CPU-specific flags (PR #10)
 
 ## [0.2.1] - 2025-08-11
 
