@@ -19,7 +19,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
-- (placeholder)
+- Removed documentation badge from README.md.
 
 ## [0.2.1] - 2025-08-11
 
