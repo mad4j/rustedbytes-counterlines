@@ -2,10 +2,21 @@
 
 All notable changes to this project will be documented in this file.
 
+<!-- markdownlint-disable MD024 -->
+
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+
+### Added
+
+- Standard Keep a Changelog section template (headings, placeholders) to streamline future entries.
+- Version comparison links at bottom of file for quick navigation between tags.
+
+### Changed
+
+- Corrected documentation of removal of `utils.rs`: file now retained as empty stub to avoid breaking downstream imports (will be fully removed in next minor release).
 
 ## [0.2.0] - 2025-08-10
 
@@ -91,3 +102,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - REQ-7.x: Report comparison and analysis capabilities
 - REQ-8.x: Intuitive command-line interface
 - REQ-9.x: Performance optimization and cross-platform compatibility
+
+<!-- Version comparison links -->
+[Unreleased]: https://github.com/daniele-olmisani/rustedbytes-counterlines/compare/v0.2.0...HEAD
+[0.2.0]: https://github.com/daniele-olmisani/rustedbytes-counterlines/compare/v0.1.0...v0.2.0
+[0.1.0]: https://github.com/daniele-olmisani/rustedbytes-counterlines/releases/tag/v0.1.0
