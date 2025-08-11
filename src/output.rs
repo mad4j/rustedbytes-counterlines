@@ -301,12 +301,111 @@ impl ReportExporter {
 
     /// REQ-6.2: Export as XML
     fn export_xml(&self, report: &Report, path: &Path) -> Result<()> {
-        let xml =
-            serde_xml_rs::to_string(report).map_err(|e| SlocError::Serialization(e.to_string()))?;
+        // Create a simplified XML-compatible version of the report
+        let xml_content = format!(
+            r#"<?xml version="1.0" encoding="UTF-8"?>
+<report>
+  <reportFormatVersion>{}</reportFormatVersion>
+  <generatedAt>{}</generatedAt>
+  <summary>
+    <totalFiles>{}</totalFiles>
+    <totalLines>{}</totalLines>
+    <logicalLines>{}</logicalLines>
+    <commentLines>{}</commentLines>
+    <emptyLines>{}</emptyLines>
+    <languagesCount>{}</languagesCount>
+    <unsupportedFiles>{}</unsupportedFiles>
+  </summary>
+  <files>
+{}</files>
+  <languages>
+{}</languages>
+  <unsupportedFiles>
+{}</unsupportedFiles>
+{}</report>"#,
+            report.report_format_version,
+            report.generated_at.to_rfc3339(),
+            report.summary.total_files,
+            report.summary.total_lines,
+            report.summary.logical_lines,
+            report.summary.comment_lines,
+            report.summary.empty_lines,
+            report.summary.languages_count,
+            report.summary.unsupported_files,
+            self.format_files_xml(&report.files),
+            self.format_languages_xml(&report.languages),
+            self.format_unsupported_files_xml(&report.unsupported_files),
+            self.format_checksum_xml(&report.checksum)
+        );
 
         let mut file = File::create(path)?;
-        file.write_all(xml.as_bytes())?;
+        file.write_all(xml_content.as_bytes())?;
         Ok(())
+    }
+
+    /// Format files section for XML
+    fn format_files_xml(&self, files: &[crate::report::FileStats]) -> String {
+        files.iter().map(|f| format!(
+            r#"    <file>
+      <path>{}</path>
+      <language>{}</language>
+      <totalLines>{}</totalLines>
+      <logicalLines>{}</logicalLines>
+      <commentLines>{}</commentLines>
+      <emptyLines>{}</emptyLines>
+    </file>"#,
+            self.escape_xml(&f.path.to_string_lossy()),
+            self.escape_xml(&f.language),
+            f.total_lines,
+            f.logical_lines,
+            f.comment_lines,
+            f.empty_lines
+        )).collect::<Vec<_>>().join("\n")
+    }
+
+    /// Format languages section for XML
+    fn format_languages_xml(&self, languages: &[crate::report::LanguageStats]) -> String {
+        languages.iter().map(|l| format!(
+            r#"    <language>
+      <name>{}</name>
+      <fileCount>{}</fileCount>
+      <totalLines>{}</totalLines>
+      <logicalLines>{}</logicalLines>
+      <commentLines>{}</commentLines>
+      <emptyLines>{}</emptyLines>
+    </language>"#,
+            self.escape_xml(&l.language),
+            l.file_count,
+            l.total_lines,
+            l.logical_lines,
+            l.comment_lines,
+            l.empty_lines
+        )).collect::<Vec<_>>().join("\n")
+    }
+
+    /// Format unsupported files section for XML
+    fn format_unsupported_files_xml(&self, unsupported_files: &[std::path::PathBuf]) -> String {
+        unsupported_files.iter().map(|f| format!(
+            r#"    <unsupportedFile>{}</unsupportedFile>"#,
+            self.escape_xml(&f.to_string_lossy())
+        )).collect::<Vec<_>>().join("\n")
+    }
+
+    /// Format checksum section for XML
+    fn format_checksum_xml(&self, checksum: &Option<String>) -> String {
+        match checksum {
+            Some(checksum) => format!("\n  <checksum>{}</checksum>", self.escape_xml(checksum)),
+            None => String::new(),
+        }
+    }
+
+    /// Escape XML special characters
+    fn escape_xml(&self, text: &str) -> String {
+        text.replace('&', "&amp;")
+            .replace('<', "&lt;")
+            .replace('>', "&gt;")
+            .replace('"', "&quot;")
+            .replace('\'', "&apos;")
     }
 
     /// REQ-6.3: Export as CSV

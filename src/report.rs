@@ -17,7 +17,7 @@ use crate::config::{AppConfig, MetricsLogger};
 use crate::counter;
 use crate::error::Result;
 use chrono::{DateTime, Utc};
-use serde::{Deserialize, Serialize};
+use serde::{Deserialize, Serialize, Deserializer, Serializer};
 use sha2::{Digest, Sha256};
 use std::collections::HashMap;
 use std::path::PathBuf;
@@ -28,10 +28,66 @@ use std::time::Instant;
 // Use version from Cargo.toml at compile time
 pub const REPORT_FORMAT_VERSION: &str = env!("CARGO_PKG_VERSION");
 
+/// Helper function to serialize DateTime as String for XML compatibility
+fn serialize_datetime<S>(dt: &DateTime<Utc>, serializer: S) -> std::result::Result<S::Ok, S::Error>
+where
+    S: Serializer,
+{
+    serializer.serialize_str(&dt.to_rfc3339())
+}
+
+/// Helper function to deserialize String as DateTime for XML compatibility
+fn deserialize_datetime<'de, D>(deserializer: D) -> std::result::Result<DateTime<Utc>, D::Error>
+where
+    D: Deserializer<'de>,
+{
+    let s = String::deserialize(deserializer)?;
+    DateTime::parse_from_rfc3339(&s)
+        .map(|dt| dt.with_timezone(&Utc))
+        .map_err(serde::de::Error::custom)
+}
+
+/// Helper function to serialize PathBuf as String for XML compatibility
+fn serialize_path<S>(path: &PathBuf, serializer: S) -> std::result::Result<S::Ok, S::Error>
+where
+    S: Serializer,
+{
+    serializer.serialize_str(&path.to_string_lossy())
+}
+
+/// Helper function to deserialize String as PathBuf for XML compatibility
+fn deserialize_path<'de, D>(deserializer: D) -> std::result::Result<PathBuf, D::Error>
+where
+    D: Deserializer<'de>,
+{
+    let s = String::deserialize(deserializer)?;
+    Ok(PathBuf::from(s))
+}
+
+/// Helper function to serialize Vec<PathBuf> as Vec<String> for XML compatibility
+fn serialize_paths<S>(paths: &Vec<PathBuf>, serializer: S) -> std::result::Result<S::Ok, S::Error>
+where
+    S: Serializer,
+{
+    let string_paths: Vec<String> = paths.iter().map(|p| p.to_string_lossy().to_string()).collect();
+    string_paths.serialize(serializer)
+}
+
+/// Helper function to deserialize Vec<String> as Vec<PathBuf> for XML compatibility
+fn deserialize_paths<'de, D>(deserializer: D) -> std::result::Result<Vec<PathBuf>, D::Error>
+where
+    D: Deserializer<'de>,
+{
+    let string_paths = Vec::<String>::deserialize(deserializer)?;
+    Ok(string_paths.into_iter().map(PathBuf::from).collect())
+}
+
 /// REQ-6.4: File statistics
 #[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename = "fileStats")]
 /// REQ-1.1: File statistics including comment lines
 pub struct FileStats {
+    #[serde(serialize_with = "serialize_path", deserialize_with = "deserialize_path")]
     pub path: PathBuf,
     pub language: String,
     pub total_lines: usize,
@@ -42,6 +98,7 @@ pub struct FileStats {
 
 /// REQ-6.4: Language summary statistics (includes comment lines per REQ-1.1)
 #[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename = "languageStats")]
 pub struct LanguageStats {
     pub language: String,
     pub file_count: usize,
@@ -54,6 +111,7 @@ pub struct LanguageStats {
 /// REQ-6.4, REQ-6.5, REQ-6.6, REQ-6.7: Report structure
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
+#[serde(rename = "report")]
 /// REQ-6.4, REQ-6.5, REQ-6.6, REQ-6.7: Report structure (includes comment lines per REQ-1.1)
 /// REQ-6.4, REQ-6.5, REQ-6.6, REQ-6.7, REQ-3.5: Report structure (includes unsupported files)
 pub struct Report {
@@ -61,6 +119,7 @@ pub struct Report {
     pub report_format_version: String,
 
     /// REQ-6.5: Generation timestamp (RFC 3339 / ISO 8601)
+    #[serde(serialize_with = "serialize_datetime", deserialize_with = "deserialize_datetime")]
     pub generated_at: DateTime<Utc>,
 
     /// REQ-6.4: Per-file statistics
@@ -73,6 +132,7 @@ pub struct Report {
     pub summary: GlobalSummary,
 
     /// REQ-3.5: List of unsupported files (excluded from statistics)
+    #[serde(serialize_with = "serialize_paths", deserialize_with = "deserialize_paths")]
     pub unsupported_files: Vec<std::path::PathBuf>,
 
     /// REQ-6.9: Optional checksum
@@ -81,6 +141,7 @@ pub struct Report {
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename = "globalSummary")]
 /// REQ-6.4: Global summary statistics (includes comment lines per REQ-1.1)
 pub struct GlobalSummary {
     pub total_files: usize,
