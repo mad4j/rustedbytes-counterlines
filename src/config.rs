@@ -59,6 +59,8 @@ pub struct DefaultsConfig {
     pub no_progress: bool,
     #[serde(default = "default_format")]
     pub output_format: String,
+    #[serde(default = "default_output_file")]
+    pub output_file: String, // base name (without extension) for auto-generated report files
 }
 
 impl Default for PerformanceConfig {
@@ -78,6 +80,7 @@ impl Default for DefaultsConfig {
             recursive: default_recursive(),
             no_progress: default_no_progress(),
             output_format: default_format(),
+            output_file: default_output_file(),
         }
     }
 }
@@ -103,6 +106,12 @@ fn default_no_progress() -> bool {
 fn default_format() -> String {
     "json".to_string()
 }
+fn default_output_file() -> String { // new default base report name
+    DEFAULT_OUTPUT_FILE_BASE.to_string()
+}
+
+/// Public constant for the default base name of auto-generated report files
+pub const DEFAULT_OUTPUT_FILE_BASE: &str = "sloc-report";
 
 impl AppConfig {
     pub fn from_file(path: &Path) -> crate::error::Result<Self> {

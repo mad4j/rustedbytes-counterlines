@@ -11,7 +11,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- (placeholder)
+- Default auto-generated report filename support: when using `count` with `--format/-f` but without `--output/-o`, a report file is saved using the configurable base name (defaults to `sloc-report.<ext>`). Added `defaults.output_file` to configuration.
+- Extended same auto-generated output filename behavior to `report` command when `--output/-o` is omitted.
 
 ### Changed
 
@@ -19,7 +20,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
-- Removed documentation badge from README.md.
+- Removed documentation badge from `README.md`.
 - Fix XML serialization by upgrading serde-xml-rs to v0.8.1 (PR #8)
 
 ## [0.2.1] - 2025-08-11

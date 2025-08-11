@@ -226,14 +226,22 @@ pub fn execute_count(args: CountArgs) -> Result<()> {
     metrics_logger.log_metric("console_output_time", console_start.elapsed().as_secs_f64());
 
     // REQ-6.8: Export report if requested (json/xml/csv)
-    if let Some(output_path) = args.output {
-        if let Some(format) = args.format {
-            let export_start = Instant::now();
-            let exporter = ReportExporter::new();
-            exporter.export(&report, &output_path, format)?;
-            metrics_logger.log_metric("report_export_time", export_start.elapsed().as_secs_f64());
-            println!("Report saved to: {}", output_path.display());
-        }
+    if let Some(format) = args.format {
+        // Determine output path: explicit CLI value or auto-generate using default base name from config
+        let output_path = if let Some(p) = args.output.clone() {
+            p
+        } else {
+            // build default file name: <base>.<ext>
+            let base = &app_config.defaults.output_file;
+            let ext = match format { crate::cli::OutputFormat::Json => "json", crate::cli::OutputFormat::Xml => "xml", crate::cli::OutputFormat::Csv => "csv" };
+            PathBuf::from(format!("{}.{ext}", base))
+        };
+
+        let export_start = Instant::now();
+        let exporter = ReportExporter::new();
+        exporter.export(&report, &output_path, format)?;
+        metrics_logger.log_metric("report_export_time", export_start.elapsed().as_secs_f64());
+        println!("Report saved to: {}", output_path.display());
     }
 
     // REQ-9.7: Log final completion metrics (fine operazione)

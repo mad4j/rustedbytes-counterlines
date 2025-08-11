@@ -13,6 +13,7 @@ metrics_file = "sloc_metrics.log"  # Path to metrics log file
 recursive = false
 no_progress = false
 output_format = "json"
+output_file = "sloc-report"  # Base name for auto-generated report when --format is given without --output
 
 # Custom language definitions can be added here
 # This extends the built-in language support

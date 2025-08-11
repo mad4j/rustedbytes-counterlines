@@ -230,13 +230,15 @@ pub fn execute_report(args: ReportArgs) -> Result<()> {
 
     let metrics_logger = Arc::new(MetricsLogger::new(&app_config.performance));
 
+    // Determine output path (may be auto-generated later in count if None)
+    let output_display = args
+        .output
+        .as_ref()
+        .map(|p| p.display().to_string())
+        .unwrap_or_else(|| "<auto>".to_string());
     let args_summary = format!(
         "paths={}, format={:?}, output={}, recursive={}, checksum={}",
-        args.paths.len(),
-        args.format,
-        args.output.display(),
-        args.recursive,
-        args.checksum
+        args.paths.len(), args.format, output_display, args.recursive, args.checksum
     );
     metrics_logger.init_session("report", &args_summary);
     metrics_logger.log_system_info();
@@ -248,7 +250,7 @@ pub fn execute_report(args: ReportArgs) -> Result<()> {
         recursive: args.recursive,
         stdin: false,
         format: Some(args.format),
-        output: Some(args.output.clone()),
+        output: args.output.clone(),
         sort: None,
         language_override: vec![],
         config: args.config,
@@ -269,7 +271,11 @@ pub fn execute_report(args: ReportArgs) -> Result<()> {
     let total_time = start_time.elapsed();
     metrics_logger.log_metric("total_report_generation_time", total_time.as_secs_f64());
 
-    println!("Report generated successfully: {}", args.output.display());
+    if let Some(ref p) = args.output {
+        println!("Report generated successfully: {}", p.display());
+    } else {
+        println!("Report generated successfully (auto-generated file name used)");
+    }
 
     if metrics_logger.is_enabled() {
         println!("Metrics logged to: {}", metrics_logger.file_path());

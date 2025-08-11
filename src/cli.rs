@@ -13,7 +13,7 @@ use std::path::PathBuf;
 #[command(author, version, about, long_about = None)]
 #[command(propagate_version = true)]
 pub struct Cli {
-    /// REQ-8.2: Display help via --help or -h
+    // REQ-8.2: Display help via --help or -h
     #[command(subcommand)]
     pub command: Commands,
 }
@@ -59,12 +59,12 @@ pub struct CountArgs {
     pub stdin: bool,
 
     // REQ-6.1, REQ-6.2, REQ-6.3: Support JSON, XML, CSV
-    /// Output format for report
+    /// Output format for report (auto-saves to <base>.<ext> if -o not provided; default base: sloc-report)
     #[arg(short = 'f', long, value_enum)]
     pub format: Option<OutputFormat>,
 
     // REQ-6.8: Customize output paths
-    /// Output file path for report
+    /// Output file path for report (default auto-generated: sloc-report.<ext>)
     #[arg(short, long)]
     pub output: Option<PathBuf>,
 
@@ -130,9 +130,9 @@ pub struct ReportArgs {
     #[arg(short = 'f', long, value_enum, default_value = "json")]
     pub format: OutputFormat,
 
-    /// Output file path
-    #[arg(short, long, required = true)]
-    pub output: PathBuf,
+    /// Output file path (optional; auto-generated as sloc-report.<ext> if omitted)
+    #[arg(short, long)]
+    pub output: Option<PathBuf>,
 
     /// Recursively traverse directories
     #[arg(short, long)]

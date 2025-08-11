@@ -54,8 +54,11 @@ find . -name "*.rs" | sloc count --stdin
 #### Generate Reports (REQ-8.3)
 
 ```bash
-# Generate JSON report (REQ-6.1)
+# Generate JSON report (REQ-6.1) (explicit output)
 sloc report src/ -r -f json -o report.json
+
+# Generate JSON report letting the tool auto-name the file (sloc-report.json)
+sloc report src/ -r -f json
 
 # Generate XML report (REQ-6.2)
 sloc report src/ -r -f xml -o report.xml
@@ -68,8 +71,16 @@ sloc report src/ -r -f json -o report.json --checksum
 
 # Show per-file statistics and unsupported file list in console (only if requested)
 sloc report src/ -r -f json -o report.json --details
+
+```bash
+# If you omit -o/--output but specify -f/--format with 'count', a file named 'sloc-report.<ext>'
+# is created using the configured default base name (configurable via defaults.output_file in config.toml).
+# Example with count (auto export using default base name):
+sloc count src/ -r -f json
 ```
 
+> Default auto-generated report file name: `sloc-report.<format>` (e.g., `sloc-report.json`). Configure via `defaults.output_file` in `config.toml`. Applies to both `count` and `report` when `--format` is provided without `--output`.
+---
 > **Note:** By default, the tool prints only summary and language statistics. Use `--details` to print per-file statistics and the list of unsupported files in the console output.
 
 #### Process Existing Reports (REQ-7.1)
