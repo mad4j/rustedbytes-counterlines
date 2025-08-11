@@ -1,7 +1,6 @@
 # SLOC Counter - Source Lines of Code CLI Tool
 
 [![Crates.io](https://img.shields.io/crates/v/rustedbytes-counterlines.svg)](https://crates.io/crates/rustedbytes-counterlines)
-[![Documentation](https://docs.rs/rustedbytes-counterlines/badge.svg)](https://docs.rs/rustedbytes-counterlines)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 A high-performance, multi-language source code line counter written in Rust that fully implements the requirements specified in REQUIREMENTS.md.
