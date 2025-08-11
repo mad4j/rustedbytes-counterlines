@@ -1,0 +1,8 @@
+# Cargo configuration for performance optimization
+
+[build]
+# Enable native CPU optimizations for maximum performance
+# This allows the compiler to use all available CPU instructions
+rustflags = [
+    "-C", "target-cpu=native",
+]
