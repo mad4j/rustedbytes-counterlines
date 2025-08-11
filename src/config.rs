@@ -106,7 +106,8 @@ fn default_no_progress() -> bool {
 fn default_format() -> String {
     "json".to_string()
 }
-fn default_output_file() -> String { // new default base report name
+fn default_output_file() -> String {
+    // new default base report name
     DEFAULT_OUTPUT_FILE_BASE.to_string()
 }
 

@@ -238,7 +238,11 @@ pub fn execute_report(args: ReportArgs) -> Result<()> {
         .unwrap_or_else(|| "<auto>".to_string());
     let args_summary = format!(
         "paths={}, format={:?}, output={}, recursive={}, checksum={}",
-        args.paths.len(), args.format, output_display, args.recursive, args.checksum
+        args.paths.len(),
+        args.format,
+        output_display,
+        args.recursive,
+        args.checksum
     );
     metrics_logger.init_session("report", &args_summary);
     metrics_logger.log_system_info();

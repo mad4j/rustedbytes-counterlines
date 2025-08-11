@@ -233,7 +233,11 @@ pub fn execute_count(args: CountArgs) -> Result<()> {
         } else {
             // build default file name: <base>.<ext>
             let base = &app_config.defaults.output_file;
-            let ext = match format { crate::cli::OutputFormat::Json => "json", crate::cli::OutputFormat::Xml => "xml", crate::cli::OutputFormat::Csv => "csv" };
+            let ext = match format {
+                crate::cli::OutputFormat::Json => "json",
+                crate::cli::OutputFormat::Xml => "xml",
+                crate::cli::OutputFormat::Csv => "csv",
+            };
             PathBuf::from(format!("{}.{ext}", base))
         };
 
