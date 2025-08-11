@@ -330,3 +330,34 @@ Tool version: 0.2.0
 
 [0.002s] total_operation_time: 0.002
 [0.002s] memory_usage_estimate_bytes: 1088.000
+
+=== SLOC Metrics Session Started ===
+Operation: count
+Timestamp: 2025-08-11 09:54:27 UTC
+Args: paths=1, recursive=true, threads=0, format=None
+[0.000s] system_cpu_count: 4.000
+[0.000s] system_available_parallelism: 4.000
+Tool version: 0.2.1
+[0.000s] operation_start: 0.000
+[0.000s] language_overrides_count: 0.000
+[0.000s] path_collection_time: 0.000
+[0.000s] total_files_to_process: 11.000
+[0.001s] thread_count: 4.000
+[0.001s] total_processing_time: 0.001
+[0.001s] files_processed_successfully: 11.000
+[0.001s] total_lines_processed: 2924.000
+[0.001s] logical_lines_processed: 2234.000
+[0.001s] comment_lines_processed: 331.000
+[0.001s] empty_lines_processed: 359.000
+[0.001s] overall_throughput_lines_per_sec: 4376282.465
+[0.001s] files_per_second: 16463.443
+[0.002s] report_creation_time: 0.000
+[0.002s] console_output_time: 0.001
+[0.002s] total_files: 11.000
+[0.002s] total_lines: 2924.000
+[0.002s] elapsed_seconds: 0.002
+[0.002s] lines_per_second: 0.000
+=== Session Completed ===
+
+[0.002s] total_operation_time: 0.002
+[0.002s] memory_usage_estimate_bytes: 1008.000
