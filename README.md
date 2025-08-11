@@ -1,4 +1,4 @@
-# SLOC Counter - Source Lines of Code CLI Tool
+# CounterLines - Source Lines of Code CLI Tool
 
 [![Crates.io](https://img.shields.io/crates/v/rustedbytes-counterlines.svg)](https://crates.io/crates/rustedbytes-counterlines)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
