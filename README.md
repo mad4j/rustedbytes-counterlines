@@ -117,8 +117,8 @@ sloc count src/ --ignore-preprocessor
 # Set parallel threads (REQ-9.4)
 sloc count src/ -r -j 8
 
-# Show progress bar (REQ-9.5)
-sloc count src/ -r --progress
+# Progress bar shown by default (REQ-9.5). Use --no-progress to disable
+sloc count src/ -r --no-progress
 ```
 
 ## Supported Languages & Unsupported Files
@@ -231,7 +231,7 @@ preprocessor_prefix = "#"
 
 - **Parallel Processing** (REQ-9.4): Utilizes multiple CPU cores via Rayon
 - **Memory Efficient** (REQ-9.6): Streams files instead of loading them entirely
-- **Progress Indicators** (REQ-9.5): Optional progress bars for large operations
+- **Progress Indicators** (REQ-9.5): Progress bars enabled by default for all operations
 - **Deterministic Output** (REQ-9.3): Consistent results for identical inputs
 
 ## Console Output
