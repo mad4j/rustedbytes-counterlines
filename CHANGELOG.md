@@ -11,12 +11,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- Standard Keep a Changelog section template (headings, placeholders) to streamline future entries.
-- Version comparison links at bottom of file for quick navigation between tags.
+- Standard Keep a Changelog section template to facilitate future releases. (commit d4d7d45)
+- Version comparison links at the bottom of the file for quick navigation between tags. (commit d4d7d45)
 
 ### Changed
 
-- Corrected documentation of removal of `utils.rs`: file now retained as empty stub to avoid breaking downstream imports (will be fully removed in next minor release).
+- Corrected the note about removal of `utils.rs`: the file is kept as an empty stub for temporary compatibility and will be removed in the next minor release. (commit d4d7d45)
+- Progress bar documentation aligned with current logic. (PR #6)
+
+### Fixed
+
+- Fixed incorrect URLs in Cargo manifest. (PR #2)
+- Clarified and expanded CLI progress bar documentation (enable/disable behavior). (PR #4)
 
 ## [0.2.0] - 2025-08-10
 
