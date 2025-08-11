@@ -11,6 +11,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- (placeholder)
+
+### Changed
+
+- (placeholder)
+
+### Fixed
+
+- (placeholder)
+
+## [0.2.1] - 2025-08-11
+
+### Added
+
 - Standard Keep a Changelog section template to facilitate future releases. (commit d4d7d45)
 - Version comparison links at the bottom of the file for quick navigation between tags. (commit d4d7d45)
 
@@ -110,6 +124,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - REQ-9.x: Performance optimization and cross-platform compatibility
 
 <!-- Version comparison links -->
-[Unreleased]: https://github.com/daniele-olmisani/rustedbytes-counterlines/compare/v0.2.0...HEAD
+[Unreleased]: https://github.com/daniele-olmisani/rustedbytes-counterlines/compare/v0.2.1...HEAD
+[0.2.1]: https://github.com/daniele-olmisani/rustedbytes-counterlines/compare/v0.2.0...v0.2.1
 [0.2.0]: https://github.com/daniele-olmisani/rustedbytes-counterlines/compare/v0.1.0...v0.2.0
 [0.1.0]: https://github.com/daniele-olmisani/rustedbytes-counterlines/releases/tag/v0.1.0
