@@ -412,6 +412,8 @@ fn count_file(
                 let trimmed = line.trim();
                 if trimmed.is_empty() {
                     empty_lines += 1;
+                } else {
+                    comment_lines += 1;
                 }
             } else {
                 // REQ-4.4: Parse line type
