@@ -582,46 +582,64 @@ fn format_comparison_xml(comparison: &ComparisonResult) -> String {
 
 /// Format language deltas for XML
 fn format_language_deltas_xml(deltas: &[LanguageDelta]) -> String {
-    deltas.iter().map(|delta| format!(
-        r#"    <languageDelta>
+    deltas
+        .iter()
+        .map(|delta| {
+            format!(
+                r#"    <languageDelta>
       <language>{}</language>
       <filesDelta>{}</filesDelta>
       <totalLinesDelta>{}</totalLinesDelta>
       <logicalLinesDelta>{}</logicalLinesDelta>
       <emptyLinesDelta>{}</emptyLinesDelta>
     </languageDelta>"#,
-        escape_xml(&delta.language),
-        delta.files_delta,
-        delta.total_lines_delta,
-        delta.logical_lines_delta,
-        delta.empty_lines_delta
-    )).collect::<Vec<_>>().join("\n")
+                escape_xml(&delta.language),
+                delta.files_delta,
+                delta.total_lines_delta,
+                delta.logical_lines_delta,
+                delta.empty_lines_delta
+            )
+        })
+        .collect::<Vec<_>>()
+        .join("\n")
 }
 
 /// Format file list for XML
 fn format_file_list_xml(files: &[String], element_name: &str) -> String {
-    files.iter().map(|file| format!(
-        r#"    <{}>{}</{}>"#,
-        element_name,
-        escape_xml(file),
-        element_name
-    )).collect::<Vec<_>>().join("\n")
+    files
+        .iter()
+        .map(|file| {
+            format!(
+                r#"    <{}>{}</{}>"#,
+                element_name,
+                escape_xml(file),
+                element_name
+            )
+        })
+        .collect::<Vec<_>>()
+        .join("\n")
 }
 
 /// Format file deltas for XML
 fn format_file_deltas_xml(deltas: &[FileDelta]) -> String {
-    deltas.iter().map(|delta| format!(
-        r#"    <modifiedFile>
+    deltas
+        .iter()
+        .map(|delta| {
+            format!(
+                r#"    <modifiedFile>
       <path>{}</path>
       <totalLinesDelta>{}</totalLinesDelta>
       <logicalLinesDelta>{}</logicalLinesDelta>
       <emptyLinesDelta>{}</emptyLinesDelta>
     </modifiedFile>"#,
-        escape_xml(&delta.path),
-        delta.total_lines_delta,
-        delta.logical_lines_delta,
-        delta.empty_lines_delta
-    )).collect::<Vec<_>>().join("\n")
+                escape_xml(&delta.path),
+                delta.total_lines_delta,
+                delta.logical_lines_delta,
+                delta.empty_lines_delta
+            )
+        })
+        .collect::<Vec<_>>()
+        .join("\n")
 }
 
 /// Escape XML special characters for processor module

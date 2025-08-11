@@ -17,7 +17,7 @@ use crate::config::{AppConfig, MetricsLogger};
 use crate::counter;
 use crate::error::Result;
 use chrono::{DateTime, Utc};
-use serde::{Deserialize, Serialize, Deserializer, Serializer};
+use serde::{Deserialize, Deserializer, Serialize, Serializer};
 use sha2::{Digest, Sha256};
 use std::collections::HashMap;
 use std::path::PathBuf;
@@ -69,7 +69,10 @@ fn serialize_paths<S>(paths: &Vec<PathBuf>, serializer: S) -> std::result::Resul
 where
     S: Serializer,
 {
-    let string_paths: Vec<String> = paths.iter().map(|p| p.to_string_lossy().to_string()).collect();
+    let string_paths: Vec<String> = paths
+        .iter()
+        .map(|p| p.to_string_lossy().to_string())
+        .collect();
     string_paths.serialize(serializer)
 }
 
@@ -87,7 +90,10 @@ where
 #[serde(rename = "fileStats")]
 /// REQ-1.1: File statistics including comment lines
 pub struct FileStats {
-    #[serde(serialize_with = "serialize_path", deserialize_with = "deserialize_path")]
+    #[serde(
+        serialize_with = "serialize_path",
+        deserialize_with = "deserialize_path"
+    )]
     pub path: PathBuf,
     pub language: String,
     pub total_lines: usize,
@@ -119,7 +125,10 @@ pub struct Report {
     pub report_format_version: String,
 
     /// REQ-6.5: Generation timestamp (RFC 3339 / ISO 8601)
-    #[serde(serialize_with = "serialize_datetime", deserialize_with = "deserialize_datetime")]
+    #[serde(
+        serialize_with = "serialize_datetime",
+        deserialize_with = "deserialize_datetime"
+    )]
     pub generated_at: DateTime<Utc>,
 
     /// REQ-6.4: Per-file statistics
@@ -132,7 +141,10 @@ pub struct Report {
     pub summary: GlobalSummary,
 
     /// REQ-3.5: List of unsupported files (excluded from statistics)
-    #[serde(serialize_with = "serialize_paths", deserialize_with = "deserialize_paths")]
+    #[serde(
+        serialize_with = "serialize_paths",
+        deserialize_with = "deserialize_paths"
+    )]
     pub unsupported_files: Vec<std::path::PathBuf>,
 
     /// REQ-6.9: Optional checksum
@@ -242,8 +254,17 @@ impl Report {
         let report = match format {
             crate::cli::OutputFormat::Json => serde_json::from_str(&content)
                 .map_err(|e| crate::error::SlocError::Deserialization(e.to_string()))?,
-            crate::cli::OutputFormat::Xml => serde_xml_rs::from_str(&content)
-                .map_err(|e| crate::error::SlocError::Deserialization(e.to_string()))?,
+            crate::cli::OutputFormat::Xml => {
+                // Try serde first for compatibility, fall back to error message
+                match serde_xml_rs::from_str(&content) {
+                    Ok(report) => report,
+                    Err(_) => {
+                        return Err(crate::error::SlocError::Deserialization(
+                            "XML import is not fully supported for this XML format. Please use JSON format for reliable import/export functionality.".to_string()
+                        ));
+                    }
+                }
+            }
             crate::cli::OutputFormat::Csv => {
                 // CSV requires special handling
                 Self::from_csv(&content)?

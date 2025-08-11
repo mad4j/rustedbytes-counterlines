@@ -345,8 +345,11 @@ impl ReportExporter {
 
     /// Format files section for XML
     fn format_files_xml(&self, files: &[crate::report::FileStats]) -> String {
-        files.iter().map(|f| format!(
-            r#"    <file>
+        files
+            .iter()
+            .map(|f| {
+                format!(
+                    r#"    <file>
       <path>{}</path>
       <language>{}</language>
       <totalLines>{}</totalLines>
@@ -354,19 +357,25 @@ impl ReportExporter {
       <commentLines>{}</commentLines>
       <emptyLines>{}</emptyLines>
     </file>"#,
-            self.escape_xml(&f.path.to_string_lossy()),
-            self.escape_xml(&f.language),
-            f.total_lines,
-            f.logical_lines,
-            f.comment_lines,
-            f.empty_lines
-        )).collect::<Vec<_>>().join("\n")
+                    self.escape_xml(&f.path.to_string_lossy()),
+                    self.escape_xml(&f.language),
+                    f.total_lines,
+                    f.logical_lines,
+                    f.comment_lines,
+                    f.empty_lines
+                )
+            })
+            .collect::<Vec<_>>()
+            .join("\n")
     }
 
     /// Format languages section for XML
     fn format_languages_xml(&self, languages: &[crate::report::LanguageStats]) -> String {
-        languages.iter().map(|l| format!(
-            r#"    <language>
+        languages
+            .iter()
+            .map(|l| {
+                format!(
+                    r#"    <language>
       <name>{}</name>
       <fileCount>{}</fileCount>
       <totalLines>{}</totalLines>
@@ -374,21 +383,30 @@ impl ReportExporter {
       <commentLines>{}</commentLines>
       <emptyLines>{}</emptyLines>
     </language>"#,
-            self.escape_xml(&l.language),
-            l.file_count,
-            l.total_lines,
-            l.logical_lines,
-            l.comment_lines,
-            l.empty_lines
-        )).collect::<Vec<_>>().join("\n")
+                    self.escape_xml(&l.language),
+                    l.file_count,
+                    l.total_lines,
+                    l.logical_lines,
+                    l.comment_lines,
+                    l.empty_lines
+                )
+            })
+            .collect::<Vec<_>>()
+            .join("\n")
     }
 
     /// Format unsupported files section for XML
     fn format_unsupported_files_xml(&self, unsupported_files: &[std::path::PathBuf]) -> String {
-        unsupported_files.iter().map(|f| format!(
-            r#"    <unsupportedFile>{}</unsupportedFile>"#,
-            self.escape_xml(&f.to_string_lossy())
-        )).collect::<Vec<_>>().join("\n")
+        unsupported_files
+            .iter()
+            .map(|f| {
+                format!(
+                    r#"    <unsupportedFile>{}</unsupportedFile>"#,
+                    self.escape_xml(&f.to_string_lossy())
+                )
+            })
+            .collect::<Vec<_>>()
+            .join("\n")
     }
 
     /// Format checksum section for XML
