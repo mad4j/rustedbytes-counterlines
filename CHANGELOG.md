@@ -9,21 +9,26 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+_No unreleased changes yet._
+
+## [0.2.2] - 2025-08-12
+
 ### Added
 
 - Default auto-generated report filename support: when using `count` with `--format/-f` but without `--output/-o`, a report file is saved using the configurable base name (defaults to `sloc-report.<ext>`). Added `defaults.output_file` to configuration.
-- Extended same auto-generated output filename behavior to `report` command when `--output/-o` is omitted.
+- Extended same auto-generated output filename behavior to `report` command when `--output/-o` is omitted (parity between `count` and `report`).
 
 ### Changed
 
 - Updated `Cargo.toml` to use the latest dependency versions.
+- Standardized repository links in documentation to point to canonical `mad4j/rustedbytes-counterlines` path.
 
 ### Fixed
 
-- Removed documentation badge from `README.md`.
-- Fix XML serialization by upgrading serde-xml-rs to v0.8.1 (PR #8)
-- Fix Performance optimization: Add optimized Cargo profiles and CPU-specific flags (PR #10)
-- Fix line count mismatch for multi-line comments (PR #12)
+- Removed outdated documentation badge from `README.md`.
+- Fixed XML serialization by upgrading `serde-xml-rs` to v0.8.1 (PR #8).
+- Performance optimization: Add optimized Cargo profiles and CPU-specific flags (PR #10).
+- Line count mismatch for multi-line comments (PR #12).
 
 ## [0.2.1] - 2025-08-11
 
@@ -128,7 +133,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - REQ-9.x: Performance optimization and cross-platform compatibility
 
 <!-- Version comparison links -->
-[Unreleased]: https://github.com/daniele-olmisani/rustedbytes-counterlines/compare/v0.2.1...HEAD
-[0.2.1]: https://github.com/daniele-olmisani/rustedbytes-counterlines/compare/v0.2.0...v0.2.1
-[0.2.0]: https://github.com/daniele-olmisani/rustedbytes-counterlines/compare/v0.1.0...v0.2.0
-[0.1.0]: https://github.com/daniele-olmisani/rustedbytes-counterlines/releases/tag/v0.1.0
+[Unreleased]: https://github.com/mad4j/rustedbytes-counterlines/compare/v0.2.2...HEAD
+[0.2.2]: https://github.com/mad4j/rustedbytes-counterlines/compare/v0.2.1...v0.2.2
+[0.2.1]: https://github.com/mad4j/rustedbytes-counterlines/compare/v0.2.0...v0.2.1
+[0.2.0]: https://github.com/mad4j/rustedbytes-counterlines/compare/v0.1.0...v0.2.0
+[0.1.0]: https://github.com/mad4j/rustedbytes-counterlines/releases/tag/v0.1.0

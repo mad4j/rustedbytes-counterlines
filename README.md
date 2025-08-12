@@ -19,8 +19,8 @@ A high-performance, multi-language source code line counter written in Rust that
 
 ```bash
 # Clone the repository
-git clone https://github.com/yourusername/sloc-counter.git
-cd sloc-counter
+git clone https://github.com/mad4j/rustedbytes-counterlines.git
+cd rustedbytes-counterlines
 
 # Build the project
 cargo build --release
